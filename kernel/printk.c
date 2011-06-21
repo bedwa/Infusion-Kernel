@@ -664,15 +664,17 @@ static int have_callable_console(void)
 
 asmlinkage int printk(const char *fmt, ...)
 {
+#if 0 //Disable printk
 	va_list args;
 	int r;
 
 	va_start(args, fmt);
 	r = vprintk(fmt, args);
 	va_end(args);
-
 	return r;
-}
+#endif //Disable printk
+        return 0;
+ }
 
 /* cpu currently holding logbuf_lock */
 static volatile unsigned int printk_cpu = UINT_MAX;
@@ -745,6 +747,7 @@ static inline void printk_delay(void)
 
 asmlinkage int vprintk(const char *fmt, va_list args)
 {
+#if 0 //Disable printk
 	int printed_len = 0;
 	int current_log_level = default_message_loglevel;
 	unsigned long flags;
@@ -876,6 +879,8 @@ out_restore_irqs:
 
 	preempt_enable();
 	return printed_len;
+#endif //Disable printk
+        return 0;
 }
 EXPORT_SYMBOL(printk);
 EXPORT_SYMBOL(vprintk);

@@ -200,7 +200,7 @@ void flush_dcache_page(struct page *page)
 
 #ifndef CONFIG_SMP
 	if (!PageHighMem(page) && mapping && !mapping_mapped(mapping))
-		set_bit(PG_dcache_dirty, &page->flags);
+                clear_bit(PG_dcache_clean, &page->flags);
 	else
 #endif
 	{

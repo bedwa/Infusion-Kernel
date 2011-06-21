@@ -607,6 +607,11 @@ static void dma_cache_maint_contiguous(struct page *page, unsigned long offset,
 
 	paddr = page_to_phys(page) + offset;
 	outer_op(paddr, paddr + size);
+
+ /*
+ * Mark the D-cache clean for this page to avoid extra flushing.
+ */
+ set_bit(PG_dcache_clean, &page->flags);
 }
 
 void dma_cache_maint_page(struct page *page, unsigned long offset,

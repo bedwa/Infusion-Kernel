@@ -42,6 +42,7 @@
 #define DBG(fmt...)
 //#define DBG(fmt...) printk(fmt)
 
+extern int active_states[7];
 
 unsigned int dvfs_change_direction;
 #define CLIP_LEVEL(a, b) (a > b ? b : a)
@@ -80,42 +81,60 @@ extern int store_up_down_threshold(unsigned int down_threshold_value,
 
 /* frequency */
 static struct cpufreq_frequency_table s5pc110_freq_table_1GHZ[] = {
-	{L0, 1000*1000},
-	{L1, 800*1000},
-	{L2, 400*1000},
-	{L3, 200*1000},
-	{L4, 100*1000},
+        {L0, 1400*1000},
+        {L1, 1300*1000},
+	{L2, 1200*1000},
+	{L3, 1120*1000},
+	{L4, 1000*1000},
+	{L5, 800*1000},
+        {L6, 600*1000},
+	{L7, 400*1000},
+	{L8, 200*1000},
+	{L9, 100*1000},
 	{0, CPUFREQ_TABLE_END},
 };
 
 /*Assigning different index for fast scaling up*/
 static unsigned char transition_state_1GHZ[][2] = {
-        {1, 0},
-        {2, 0},
-        {3, 1},
-        {4, 2},
-        {4, 3},
+        {1, 5},//1400
+        {2, 5},//1300
+        {3, 5},//1200
+        {4, 5},//1.12
+        {5, 5},//1
+        {6, 5},//800
+        {7, 5},//600
+        {8, 6},//400
+        {9, 7},//200
+        {9, 8},//100
 };
 
 /* frequency */
 static struct cpufreq_frequency_table s5pc110_freq_table_1d2GHZ[] = {
-	{L0, 1200*1000},
-	{L1, 1000*1000},
-	{L2, 800*1000},
-	{L3, 400*1000},
-	{L4, 200*1000},
-	{L5, 100*1000},
+        {L0, 1400*1000},
+        {L1, 1300*1000},
+	{L2, 1200*1000},
+	{L3, 1120*1000},
+	{L4, 1000*1000},
+	{L5, 800*1000},
+        {L6, 600*1000},
+	{L7, 400*1000},
+	{L8, 200*1000},
+	{L9, 100*1000},
 	{0, CPUFREQ_TABLE_END},
 };
 
 /*Assigning different index for fast scaling up*/
 static unsigned char transition_state_1d2GHZ[][2] = {
-        {1, 0},
-        {2, 0},
-        {3, 1},
-        {4, 2},
-        {5, 3},
-        {5, 4},        
+        {1, 5},//1400
+        {2, 5},//1300
+        {3, 5},//1200
+        {4, 5},//1.12
+        {5, 5},//1
+        {6, 5},//800
+        {7, 5},//600
+        {8, 6},//400
+        {9, 7},//200
+        {9, 8},//100
 };
 
 
@@ -130,20 +149,29 @@ static struct cpufreq_frequency_table *s5pc110_freq_table[] = {
 };
 
 static unsigned int s5pc110_thres_table_1GHZ[][2] = {
-      	{55, 80},
-        {50, 90},
-        {50, 90},
-        {40, 90},
-        {20, 80},
+        {55, 80}, //100
+        {55, 90}, //200
+        {55, 90}, //400
+        {55, 90}, //600
+        {55, 90}, //800
+        {55, 90}, //1000
+        {60, 80}, //1120
+        {60, 80}, //1200
+        {60, 80}, //1300
+        {60, 80}, //1400
 };
 
 static unsigned int s5pc110_thres_table_1d2GHZ[][2] = {
-      	{40, 70},
-        {40, 70},
-        {30, 70},
-        {30, 70},
-        {30, 70},
-        {30, 70},
+        {55, 80}, //100
+        {55, 90}, //200
+        {55, 90}, //400
+        {55, 90}, //600
+        {55, 90}, //800
+        {55, 90}, //1000
+        {60, 80}, //1120
+        {60, 80}, //1200
+        {60, 80}, //1300
+        {60, 80}, //1400
 };
 
 static unsigned int  (*s5pc110_thres_table[2])[2] = {
@@ -158,40 +186,87 @@ static int get_dvfs_perf_level(enum freq_level_states freq_level, unsigned int *
 	struct cpufreq_frequency_table *freq_tab = s5pc110_freq_table[S5PC11X_FREQ_TAB];
 	switch(freq_level)
 	{
-	case LEV_1200MHZ:
-		freq = 1200 * 1000;
-		break;
-	case LEV_1000MHZ:
-		freq = 1000 * 1000;
-		break;
-	case LEV_800MHZ:
-		freq = 800 * 1000;
-		break;
-	case LEV_400MHZ:
-		freq = 400 * 1000;
-		break;
-	case LEV_200MHZ:
-		freq = 200 * 1000;
-		break;
-	case LEV_100MHZ:
-		freq = 100 * 1000;
-		break;
-	default:
-		printk(KERN_ERR "Invalid freq level\n");
-		return -EINVAL;
-	}
-	while((freq_tab[index].frequency != CPUFREQ_TABLE_END) &&
-		(freq_tab[index].frequency != freq)) {
-		index++;
-	}
-	if(freq_tab[index].frequency == CPUFREQ_TABLE_END)
-	{
-		printk(KERN_ERR "Invalid freq table\n");
-		return -EINVAL;	
-	}
-
+        case LEV_1400MHZ:
+                freq = 1400 * 1000;
+                break;
+        case LEV_1300MHZ:
+                freq = 1300 * 1000;
+                break;
+        case LEV_1200MHZ:
+                freq = 1200 * 1000;
+                break;
+        case LEV_1120MHZ:
+                freq = 1120 * 1000;
+                break;
+        case LEV_1000MHZ:
+                freq = 1000 * 1000;
+                break;
+        case LEV_800MHZ:
+                freq = 800 * 1000;
+                break;
+        case LEV_600MHZ:
+                freq = 600 * 1000;
+                break;
+        case LEV_400MHZ:
+                freq = 400 * 1000;
+                break;
+        case LEV_200MHZ:
+                freq = 200 * 1000; 
+                break;
+        case LEV_100MHZ:
+                freq = 100 * 1000;
+                break;
+        default:
+                printk(KERN_ERR "Invalid freq level\n");
+                return -EINVAL;
+        }
+        while((freq_tab[index].frequency != CPUFREQ_TABLE_END) &&
+                (freq_tab[index].frequency != freq)) {
+                index++;
+        }
+        if(freq_tab[index].frequency == CPUFREQ_TABLE_END)
+        {
+                 printk(KERN_ERR "Invalid freq table\n");
+                 return -EINVAL;
+        }
 	*perf_level = freq_tab[index].index;
 	return 0;
+}
+
+extern int exp_update_states;
+
+void update_transition_states()
+{
+        u32 i, prev_j; int j;
+
+        for(i=0;i<S5PC11X_MAXFREQLEVEL;i++) { //down
+                for(j=i+1;j<S5PC11X_MAXFREQLEVEL+1;j++)
+                        if(active_states[j]) {
+                                transition_state[S5PC11X_FREQ_TAB][i][0]=j;
+                                j=S5PC11X_MAXFREQLEVEL+1;
+                        } else {
+                                transition_state[S5PC11X_FREQ_TAB][i][0]=i;
+                        }
+        }
+        transition_state[S5PC11X_FREQ_TAB][S5PC11X_MAXFREQLEVEL][0]=S5PC11X_MAXFREQLEVEL;
+
+        prev_j=0;
+        for(i=S5PC11X_MAXFREQLEVEL;i>0;i--) { //up
+                for(j=i-1;j>-1;j--)
+                        if(active_states[j]) {
+                                transition_state[S5PC11X_FREQ_TAB][i][1]=j;
+                                prev_j=j;
+                                j=-1;
+                        } else {
+                                transition_state[S5PC11X_FREQ_TAB][i][1]=prev_j;
+                        }
+        }
+        transition_state[S5PC11X_FREQ_TAB][0][1]=prev_j;
+
+        printk("update_transition_state...\n");
+        for(i=0;i<S5PC11X_MAXFREQLEVEL+1;i++) {
+                printk("%d, %d\n",transition_state[S5PC11X_FREQ_TAB][i][0],transition_state[S5PC11X_FREQ_TAB][i][1]);
+        }
 }
 
 
@@ -268,90 +343,121 @@ void s5pc110_unlock_dvfs_high_level(unsigned int nToken)
 }
 EXPORT_SYMBOL(s5pc110_unlock_dvfs_high_level);
 #endif //ENABLE_DVFS_LOCK_HIGH
+unsigned int s5pc11x_target_freq_find_index(unsigned int index_find,int flag)
+ {
+        unsigned int index = index_find;
+        struct cpufreq_frequency_table *freq_tab = s5pc110_freq_table[S5PC11X_FREQ_TAB];
+                if(flag == 1)
+                        while(true){
+                          if(active_states[index] == 1 || (index == 0))
+                                break;
+                          index--;
+                        }
+                else
+                        while(true){
+                          if(active_states[index] == 1 || (freq_tab[index].frequency == CPUFREQ_TABLE_END))
+break;
+                          index++;
+                        }
+         return index;
+}
 
-unsigned int s5pc11x_target_frq(unsigned int pred_freq, 
-				int flag)
+unsigned int s5pc11x_target_frq(unsigned int pred_freq,
+                                int flag)
 {
-	int index;
-	unsigned long irqflags;
-	unsigned int freq;
+        int index;
+        //unsigned long irqflags;
+        unsigned int freq;
 
-	struct cpufreq_frequency_table *freq_tab = s5pc110_freq_table[S5PC11X_FREQ_TAB];
-	
-	if(freq_tab[0].frequency < pred_freq) {
-	   index = 0;	
-	   goto s5pc11x_target_frq_end;
-	}
+        struct cpufreq_frequency_table *freq_tab = s5pc110_freq_table[S5PC11X_FREQ_TAB];
 
-	if((flag != 1)&&(flag != -1)) {
-		printk("s5pc1xx_target_frq: flag error!!!!!!!!!!!!!");
-	}
+        spin_lock(&g_dvfslock);
+        if(freq_tab[0].frequency < pred_freq) {
+           index = 0;
+           goto s5pc11x_target_frq_end;
+        }
 
-	index = s5pc11x_cpufreq_index;
+        if(exp_update_states) {
+                update_transition_states();
+                exp_update_states = 0;
+        }
 
-	if(freq_tab[index].frequency == pred_freq) {	
-		if(flag == 1)
-			index = transition_state[S5PC11X_FREQ_TAB][index][1];
-		else
-			index = transition_state[S5PC11X_FREQ_TAB][index][0];
-	}
-	/*else {
-		index = 0; 
-	}*/
 
-	if (g_dvfs_high_lock_token) {
-		 if(g_dvfs_fix_lock_limit == true) {
-			 index = g_dvfs_high_lock_limit;// use the same level
-		 }
-		 else {
-			if (index > g_dvfs_high_lock_limit)
-				index = g_dvfs_high_lock_limit;
-		 }
-	}
-	//printk("s5pc11x_target_frq index = %d\n",index);
+        if((flag != 1)&&(flag != -1)) {
+                printk("s5pc1xx_target_frq: flag error!!!!!!!!!!!!!");
+        }
+
+        index = s5pc11x_cpufreq_index;
+
+        if(freq_tab[index].frequency == pred_freq) {
+                if(flag == 1)
+                        index = transition_state[S5PC11X_FREQ_TAB][index][1];
+                else
+                        index = transition_state[S5PC11X_FREQ_TAB][index][0];
+        }
+        /*else {
+                index = 0;
+        }*/
+
+        if (g_dvfs_high_lock_token) {
+                 if(g_dvfs_fix_lock_limit == true) {
+                         index = g_dvfs_high_lock_limit;// use the same level
+                 }
+                 else {
+                        if (index > g_dvfs_high_lock_limit)
+                                index = g_dvfs_high_lock_limit;
+                 }
+         }
+         //printk("s5pc11x_target_frq index = %d\n",index);
 
 s5pc11x_target_frq_end:
-	index = CLIP_LEVEL(index, s5pc11x_cpufreq_level);
-	spin_lock_irqsave(&g_dvfslock, irqflags);
-	s5pc11x_cpufreq_index = index;
-	spin_unlock_irqrestore(&g_dvfslock, irqflags);	
-	
-	freq = freq_tab[index].frequency;
-	return freq;
+         //spin_lock_irqsave(&g_cpufreq_lock, irqflags);
+         index = s5pc11x_target_freq_find_index(index,flag);
+         index = CLIP_LEVEL(index, s5pc11x_cpufreq_level);
+         s5pc11x_cpufreq_index = index;
+         //spin_unlock_irqrestore(&g_cpufreq_lock, irqflags);
+
+         freq = freq_tab[index].frequency;
+         spin_unlock(&g_dvfslock);
+         return freq;
 }
 
 
 int s5pc11x_target_freq_index(unsigned int freq)
 {
-	int index = 0;
-	unsigned long irqflags;
-	
-	struct cpufreq_frequency_table *freq_tab = s5pc110_freq_table[S5PC11X_FREQ_TAB];
+        int index = 0;
+        unsigned long irqflags;
 
-	if(freq >= freq_tab[index].frequency) {
-		goto s5pc11x_target_freq_index_end;
-	}
+        struct cpufreq_frequency_table *freq_tab = s5pc110_freq_table[S5PC11X_FREQ_TAB];
+ 
+        if(freq >= freq_tab[index].frequency) {
+                goto s5pc11x_target_freq_index_end;
+        }
+ 
+        /*Index might have been calculated before calling this function.
+        check and early return if it is already calculated*/
+        if(freq_tab[s5pc11x_cpufreq_index].frequency == freq) {
+                return s5pc11x_cpufreq_index;
+        }
+ 
+        while((freq < freq_tab[index].frequency) &&
+                        (freq_tab[index].frequency != CPUFREQ_TABLE_END) ) {
+                index++;
+        }
+ 
+        while(active_states[index] == 0 && (freq_tab[index].frequency != CPUFREQ_TABLE_END)){
+        index++;
+        }
+ 
+        if(index > 0) {
+                if(freq != freq_tab[index].frequency) {
+                        index--;
+                }
+        }
 
-	/*Index might have been calculated before calling this function.
-	check and early return if it is already calculated*/
-	if(freq_tab[s5pc11x_cpufreq_index].frequency == freq) {		
-		return s5pc11x_cpufreq_index;
-	}
-
-	while((freq < freq_tab[index].frequency) &&
-			(freq_tab[index].frequency != CPUFREQ_TABLE_END)) {
-		index++;
-	}
-
-	if(index > 0) {
-		if(freq != freq_tab[index].frequency) {
-			index--;
-		}
-	}
-
-	if(freq_tab[index].frequency == CPUFREQ_TABLE_END) {
-		index--;
-	}
+if(freq_tab[index].frequency == CPUFREQ_TABLE_END) {
+index--;
+        }
 
 s5pc11x_target_freq_index_end:
 	spin_lock_irqsave(&g_dvfslock, irqflags);
@@ -425,7 +531,6 @@ int is_conservative_gov(void)
         return ret;
 }
 
-
 /* TODO: Add support for SDRAM timing changes */
 
 int s5pc110_verify_speed(struct cpufreq_policy *policy)
@@ -456,83 +561,83 @@ static int s5pc110_target(struct cpufreq_policy *policy,
 		       unsigned int target_freq,
 		       unsigned int relation)
 {
-	struct cpufreq_freqs freqs;
-	int ret = 0;
-	unsigned long arm_clk;
-	unsigned int index;
+        struct cpufreq_freqs freqs;
+        int ret = 0;
+        unsigned long arm_clk;
+        unsigned int index;
 
-	//unsigned long irqflags;
+        //unsigned long irqflags;
 
-	DBG("s5pc110_target called for freq=%d\n",target_freq);
+        DBG("s5pc110_target called for freq=%d\n",target_freq);
 
-	freqs.old = s5pc110_getspeed(0);
-	DBG("old _freq = %d\n",freqs.old);
+        freqs.old = s5pc110_getspeed(0);
+        DBG("old _freq = %d\n",freqs.old);
 
-	if(policy != NULL) {
-		if(policy -> governor) {
-			//spin_lock_irqsave(&g_cpufreq_lock, irqflags);
-			if (strnicmp(cpufreq_governor_name, policy->governor->name, CPUFREQ_NAME_LEN)) {
-				strcpy(cpufreq_governor_name, policy->governor->name);
-			}
-			//spin_unlock_irqrestore(&g_cpufreq_lock, irqflags);
-		}
-	}
+        if(policy != NULL) {
+                if(policy -> governor) {
+                        //spin_lock_irqsave(&g_cpufreq_lock, irqflags);
+                        if (strnicmp(cpufreq_governor_name, policy->governor->name, CPUFREQ_NAME_LEN)) {
+                                strcpy(cpufreq_governor_name, policy->governor->name);
+                        }
+                        //spin_unlock_irqrestore(&g_cpufreq_lock, irqflags);
+                }
+       }
 
-	index = s5pc11x_target_freq_index(target_freq);
-	if(index == INDX_ERROR) {
-       	printk("s5pc110_target: INDX_ERROR \n");
-		return -EINVAL;
-        }
-	DBG("Got index = %d\n",index);
+       index = s5pc11x_target_freq_index(target_freq);
+       if(index == INDX_ERROR) {
+       printk("s5pc110_target: INDX_ERROR \n");
+               return -EINVAL;
+       }
+       DBG("Got index = %d\n",index);
 
-	if(prevIndex == index)
-	{	
+       if(prevIndex == index)
+       {
 
-		DBG("Target index = Current index\n");
-       	return ret;
-	}
+               DBG("Target index = Current index\n");
+       return ret;
+       }
 
-	arm_clk = s5pc110_freq_table[S5PC11X_FREQ_TAB][index].frequency;
+       arm_clk = s5pc110_freq_table[S5PC11X_FREQ_TAB][index].frequency;
 
-	freqs.new = arm_clk;
-	freqs.cpu = 0;
+       freqs.new = arm_clk;
+       freqs.cpu = 0;
 
-	target_freq = arm_clk;
-	cpufreq_notify_transition(&freqs, CPUFREQ_PRECHANGE);
-	//spin_lock_irqsave(&g_cpufreq_lock, irqflags);
+       target_freq = arm_clk;
+       cpufreq_notify_transition(&freqs, CPUFREQ_PRECHANGE);
+       //spin_lock_irqsave(&g_cpufreq_lock, irqflags);
 
-	if(prevIndex < index) { // clock down
-       	dvfs_change_direction = 0;
-		/* frequency scaling */
-		ret = s5pc11x_clk_dsys_psys_change(index);
+       if(prevIndex < index) { // clock down
+       dvfs_change_direction = 0;
+               /* frequency scaling */
+               ret = s5pc11x_clk_dsys_psys_change(index);
 
-		ret = s5pc11x_armclk_set_rate(mpu_clk, target_freq * KHZ_T);
-		//ret = clk_set_rate(mpu_clk, target_freq * KHZ_T);
-		if(ret != 0) {
-			printk("frequency scaling error\n");
-			ret = -EINVAL;
-			goto s5pc110_target_end;
-		}
-		
-		// ARM MCS value set
-		if (S5PC11X_FREQ_TAB  == 0) { // for 1G table
-			if ((prevIndex < 3) && (index >= 3)) {
-				ret = __raw_readl(S5P_ARM_MCS);
-				DBG("MDSvalue = %08x\n", ret);
-				ret = (ret & ~(0x3)) | 0x3;
-				__raw_writel(ret, S5P_ARM_MCS);
-			}
-		} else if (S5PC11X_FREQ_TAB  == 1) { // for 1.2Ghz table
-			if ((prevIndex < 4) && (index >= 4)) {
-				ret = __raw_readl(S5P_ARM_MCS);
-				ret = (ret & ~(0x3)) | 0x3;
-				__raw_writel(ret, S5P_ARM_MCS);
-			}		
-		} else {
-			DBG("\n\nERROR\n\n INVALID DVFS TABLE !!\n");
-			return ret;
-		}
+               ret = s5pc11x_armclk_set_rate(mpu_clk, target_freq * KHZ_T);
+               //ret = clk_set_rate(mpu_clk, target_freq * KHZ_T);
+               if(ret != 0) {
+                       printk("frequency scaling error\n");
+                       ret = -EINVAL;
+                       goto s5pc110_target_end;
+               }
 
+               // ARM MCS value set
+               if (S5PC11X_FREQ_TAB == 0) { // for 1G table
+                       if ((prevIndex < 11) && (index >= 11)) {
+                               ret = __raw_readl(S5P_ARM_MCS);
+                               DBG("MDSvalue = %08x\n", ret);
+                               ret = (ret & ~(0x3)) | 0x3;
+                               __raw_writel(ret, S5P_ARM_MCS);
+                       }
+               } else if (S5PC11X_FREQ_TAB == 1) { // for 1.2Ghz table
+                      if ((prevIndex < 4) && (index >= 4)) {
+                              ret = __raw_readl(S5P_ARM_MCS);
+                              ret = (ret & ~(0x3)) | 0x3;
+                              __raw_writel(ret, S5P_ARM_MCS);
+                       }
+                } else {
+                        DBG("\n\nERROR\n\n INVALID DVFS TABLE !!\n");
+                        return ret;
+                }
+ 
 /* TODO */
 #if USE_1DOT2GHZ
 		if (S5PC11X_FREQ_TAB) {	
@@ -574,14 +679,14 @@ static int s5pc110_target(struct cpufreq_policy *policy,
 
 		// ARM MCS value set
 		if (S5PC11X_FREQ_TAB  == 0) { // for 1G table
-			if ((prevIndex >= 3) && (index < 3)) {
+			if ((prevIndex >= 11) && (index < 11)) {
 				ret = __raw_readl(S5P_ARM_MCS);
 				DBG("MDSvalue = %08x\n", ret);				
 				ret = (ret & ~(0x3)) | 0x1;
 				__raw_writel(ret, S5P_ARM_MCS);
 			}
 		} else if (S5PC11X_FREQ_TAB  == 1) { // for 1.2G table
-			if ((prevIndex >= 4) && (index < 4)) {
+			if ((prevIndex >= 11) && (index < 11)) {
 				ret = __raw_readl(S5P_ARM_MCS);
 				ret = (ret & ~(0x3)) | 0x1;
 				__raw_writel(ret, S5P_ARM_MCS);
@@ -692,6 +797,7 @@ unsigned int get_min_cpufreq(void)
 static int __init s5pc110_cpu_init(struct cpufreq_policy *policy)
 {
 	u32 i;
+       int ret_table_cpuinfo;
 	//unsigned long irqflags;
 
 	mpu_clk = clk_get(NULL, MPU_CLK);
@@ -703,30 +809,25 @@ static int __init s5pc110_cpu_init(struct cpufreq_policy *policy)
 	if (policy->cpu != 0)
 		return -EINVAL;
 	policy->cur = policy->min = policy->max = s5pc110_getspeed(0);
+	if(policy->max > 1000000)
+		policy->max = 1000000;
 	//spin_lock_irqsave(&g_cpufreq_lock, irqflags);
 
-#if USE_1DOT2GHZ
-		S5PC11X_FREQ_TAB = 1;
-		S5PC11X_MAXFREQLEVEL = 5;
-		MAXFREQ_LEVEL_SUPPORTED = 6;
-		g_dvfs_high_lock_limit = 5;
-#else
-		S5PC11X_FREQ_TAB = 0;
-		S5PC11X_MAXFREQLEVEL = 4;
-		MAXFREQ_LEVEL_SUPPORTED = 5;
-		g_dvfs_high_lock_limit = 4;
-#endif
-	
-	printk("S5PC11X_FREQ_TAB=%d , S5PC11X_MAXFREQLEVEL=%d\n",S5PC11X_FREQ_TAB,S5PC11X_MAXFREQLEVEL);
+               S5PC11X_FREQ_TAB = 0;
+               S5PC11X_MAXFREQLEVEL = 9;
+               MAXFREQ_LEVEL_SUPPORTED = 10;
+               g_dvfs_high_lock_limit = 12;
 
-	s5pc11x_cpufreq_level = S5PC11X_MAXFREQLEVEL;
-      //spin_unlock_irqrestore(&g_cpufreq_lock, irqflags);
+        printk("S5PC11X_FREQ_TAB=%d , S5PC11X_MAXFREQLEVEL=%d\n",S5PC11X_FREQ_TAB,S5PC11X_MAXFREQLEVEL);
 
-	if (S5PC11X_FREQ_TAB) {	
-		prevIndex = 2;// we are currently at 800MHZ level
-	} else {
-		prevIndex = 1;// we are currently at 800MHZ level
-	}
+        s5pc11x_cpufreq_level = S5PC11X_MAXFREQLEVEL;
+       //spin_unlock_irqrestore(&g_cpufreq_lock, irqflags);
+
+         if (S5PC11X_FREQ_TAB) {
+                 prevIndex = 2;//2;// we are currently at 800MHZ level
+         } else {
+                 prevIndex = 1;// we are currently at 800MHZ level
+         }
 
 #ifdef CONFIG_CPU_FREQ_LOG
 	//schedule_delayed_work(&dvfs_info_print_work, 60 * HZ);
@@ -739,14 +840,16 @@ static int __init s5pc110_cpu_init(struct cpufreq_policy *policy)
 //	register_early_suspend(&s5pc11x_freq_suspend);	
 #endif
 
-	#if ENABLE_DVFS_LOCK_HIGH
-	/*initialise the dvfs lock level table*/
-	for(i = 0; i < NUMBER_OF_LOCKTOKEN; i++)
-		g_dvfslockval[i] = MAXFREQ_LEVEL_SUPPORTED-1;
-	#endif
+       #if ENABLE_DVFS_LOCK_HIGH
+       /*initialise the dvfs lock level table*/
+       for(i = 0; i < NUMBER_OF_LOCKTOKEN; i++)
+               g_dvfslockval[i] = MAXFREQ_LEVEL_SUPPORTED-1;
+       #endif
 
-
-	return cpufreq_frequency_table_cpuinfo(policy, s5pc110_freq_table[S5PC11X_FREQ_TAB]);
+        update_transition_states();
+ 
+       ret_table_cpuinfo = cpufreq_frequency_table_cpuinfo(policy, s5pc110_freq_table[S5PC11X_FREQ_TAB]);
+        return ret_table_cpuinfo;
 }
 
 static struct cpufreq_driver s5pc110_driver = {

@@ -1,8 +1,8 @@
 VERSION = 2
 PATCHLEVEL = 6
 SUBLEVEL = 32
-EXTRAVERSION = .9
-NAME = Man-Eating Seals of Antiquity
+EXTRAVERSION = .9 Infusion 1.0
+NAME = Infusion Kernel 
 
 # *DOCUMENTATION*
 # To see a list of typical targets execute "make help"
@@ -181,7 +181,7 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ \
 # Note: Some architectures assign CROSS_COMPILE in their arch/*/Makefile
 export KBUILD_BUILDHOST := $(SUBARCH)
 ARCH		?= arm
-CROSS_COMPILE	?= /home/gtg465x/CodeSourcery/Sourcery_G++_Lite/bin/arm-none-eabi-
+CROSS_COMPILE	?= /home/user/Kernel/cc/bin/arm-none-eabi-
 
 
 # Architecture as present in compile.h
@@ -346,7 +346,16 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
-		   -fno-delete-null-pointer-checks
+		   -fno-delete-null-pointer-checks \
+			 -mcpu=cortex-a8 \
+			 -mfpu=neon -mfloat-abi=softfp
+			 #-mthumb
+			 #-fno-gcse -fprefetch-loop-arrays \
+			 #--param l2-cache-size=512 \
+			 #--param l1-cache-size=64 \
+			 #--param simultaneous-prefetches=6 \
+			 #--param prefetch-latency=400 \
+			 #--param l1-cache-line-size=64
 KBUILD_AFLAGS   := -D__ASSEMBLY__
 
 # Read KERNELRELEASE from include/config/kernel.release (if it exists)
