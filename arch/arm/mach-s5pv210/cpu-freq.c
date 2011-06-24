@@ -52,9 +52,9 @@ unsigned int S5PC11X_MAXFREQLEVEL = 4;
 unsigned int S5PC11X_FREQ_TAB;
 static spinlock_t g_dvfslock = SPIN_LOCK_UNLOCKED;
 static unsigned int s5pc11x_cpufreq_level = 3;
-unsigned int s5pc11x_cpufreq_index = 0;
+unsigned int s5pc11x_cpufreq_index = 6;
 
-static char cpufreq_governor_name[CPUFREQ_NAME_LEN] = "conservative";// default governor
+static char cpufreq_governor_name[CPUFREQ_NAME_LEN] = "ondemand";// default governor
 static char userspace_governor[CPUFREQ_NAME_LEN] = "userspace";
 static char conservative_governor[CPUFREQ_NAME_LEN] = "conservative";
 int s5pc11x_clk_dsys_psys_change(int index);
@@ -81,60 +81,72 @@ extern int store_up_down_threshold(unsigned int down_threshold_value,
 
 /* frequency */
 static struct cpufreq_frequency_table s5pc110_freq_table_1GHZ[] = {
-        {L0, 1400*1000},
-        {L1, 1300*1000},
-	{L2, 1200*1000},
-	{L3, 1120*1000},
-	{L4, 1000*1000},
-	{L5, 800*1000},
-        {L6, 600*1000},
-	{L7, 400*1000},
-	{L8, 200*1000},
-	{L9, 100*1000},
+        {L0, 1600*1000},
+        {L1, 1500*1000},
+	{L2, 1400*1000},
+        {L3, 1300*1000},
+	{L4, 1200*1000},
+	{L5, 1100*1000},
+	{L6, 1000*1000},
+	{L7, 900*1000},
+	{L8, 800*1000},
+        {L9, 600*1000},
+	{L10, 400*1000},
+	{L11, 200*1000},
+	{L12, 100*1000},
 	{0, CPUFREQ_TABLE_END},
 };
 
 /*Assigning different index for fast scaling up*/
 static unsigned char transition_state_1GHZ[][2] = {
-        {1, 5},//1400
-        {2, 5},//1300
-        {3, 5},//1200
-        {4, 5},//1.12
-        {5, 5},//1
-        {6, 5},//800
-        {7, 5},//600
-        {8, 6},//400
-        {9, 7},//200
-        {9, 8},//100
+	{1, 5},//1600
+        {2, 5},//1500
+        {3, 5},//1400
+        {4, 5},//1300
+        {5, 5},//1200
+        {6, 5},//1120
+        {7, 5},//1000
+        {8, 6},//900
+        {9, 7},//800
+        {10, 8},//600 
+        {11, 9},//400 
+        {12, 10},//200 
+        {12, 11},//100 
 };
 
 /* frequency */
 static struct cpufreq_frequency_table s5pc110_freq_table_1d2GHZ[] = {
-        {L0, 1400*1000},
-        {L1, 1300*1000},
-	{L2, 1200*1000},
-	{L3, 1120*1000},
-	{L4, 1000*1000},
-	{L5, 800*1000},
-        {L6, 600*1000},
-	{L7, 400*1000},
-	{L8, 200*1000},
-	{L9, 100*1000},
+        {L0, 1600*1000},
+        {L1, 1500*1000},
+	{L2, 1400*1000},
+        {L3, 1300*1000},
+	{L4, 1200*1000},
+	{L5, 1100*1000},
+	{L6, 1000*1000},
+	{L7, 900*1000},
+	{L8, 800*1000},
+        {L9, 600*1000},
+	{L10, 400*1000},
+	{L11, 200*1000},
+	{L12, 100*1000},
 	{0, CPUFREQ_TABLE_END},
 };
 
 /*Assigning different index for fast scaling up*/
 static unsigned char transition_state_1d2GHZ[][2] = {
-        {1, 5},//1400
-        {2, 5},//1300
-        {3, 5},//1200
-        {4, 5},//1.12
-        {5, 5},//1
-        {6, 5},//800
-        {7, 5},//600
-        {8, 6},//400
-        {9, 7},//200
-        {9, 8},//100
+	{1, 5},//1600
+        {2, 5},//1500
+        {3, 5},//1400
+        {4, 5},//1300
+        {5, 5},//1200
+        {6, 5},//1120
+        {7, 5},//1000
+        {8, 6},//900
+        {9, 7},//800
+        {10, 8},//600 
+        {11, 9},//400 
+        {12, 10},//200 
+        {12, 11},//100 
 };
 
 
@@ -149,29 +161,35 @@ static struct cpufreq_frequency_table *s5pc110_freq_table[] = {
 };
 
 static unsigned int s5pc110_thres_table_1GHZ[][2] = {
-        {55, 80}, //100
-        {55, 90}, //200
-        {55, 90}, //400
-        {55, 90}, //600
-        {55, 90}, //800
-        {55, 90}, //1000
-        {60, 80}, //1120
-        {60, 80}, //1200
-        {60, 80}, //1300
-        {60, 80}, //1400
+	{55, 80}, //100
+	{55, 90}, //200
+	{55, 90}, //400
+	{55, 90}, //600
+	{55, 90}, //800
+	{55, 90}, //900
+	{55, 90}, //1000
+	{60, 80}, // 1120
+	{60, 80}, // 1200
+	{60, 80}, // 1300
+	{60, 80}, // 1400
+	{60, 80}, // 1500
+	{60, 80}, // 1600
 };
 
 static unsigned int s5pc110_thres_table_1d2GHZ[][2] = {
-        {55, 80}, //100
-        {55, 90}, //200
-        {55, 90}, //400
-        {55, 90}, //600
-        {55, 90}, //800
-        {55, 90}, //1000
-        {60, 80}, //1120
-        {60, 80}, //1200
-        {60, 80}, //1300
-        {60, 80}, //1400
+	{55, 80}, //100
+	{55, 90}, //200
+	{55, 90}, //400
+	{55, 90}, //600
+	{55, 90}, //800
+	{55, 90}, //900
+	{55, 90}, //1000
+	{60, 80}, // 1120
+	{60, 80}, // 1200
+	{60, 80}, // 1300
+	{60, 80}, // 1400
+	{60, 80}, // 1500
+	{60, 80}, // 1600
 };
 
 static unsigned int  (*s5pc110_thres_table[2])[2] = {
@@ -186,6 +204,12 @@ static int get_dvfs_perf_level(enum freq_level_states freq_level, unsigned int *
 	struct cpufreq_frequency_table *freq_tab = s5pc110_freq_table[S5PC11X_FREQ_TAB];
 	switch(freq_level)
 	{
+        case LEV_1600MHZ:
+                freq = 1600 * 1000;
+                break;
+        case LEV_1500MHZ:
+                freq = 1500 * 1000;
+                break;
         case LEV_1400MHZ:
                 freq = 1400 * 1000;
                 break;
@@ -195,11 +219,14 @@ static int get_dvfs_perf_level(enum freq_level_states freq_level, unsigned int *
         case LEV_1200MHZ:
                 freq = 1200 * 1000;
                 break;
-        case LEV_1120MHZ:
-                freq = 1120 * 1000;
+        case LEV_1100MHZ:
+                freq = 1100 * 1000;
                 break;
         case LEV_1000MHZ:
                 freq = 1000 * 1000;
+                break;
+        case LEV_900MHZ:
+                freq = 900 * 1000;
                 break;
         case LEV_800MHZ:
                 freq = 800 * 1000;
@@ -814,8 +841,8 @@ static int __init s5pc110_cpu_init(struct cpufreq_policy *policy)
 	//spin_lock_irqsave(&g_cpufreq_lock, irqflags);
 
                S5PC11X_FREQ_TAB = 0;
-               S5PC11X_MAXFREQLEVEL = 9;
-               MAXFREQ_LEVEL_SUPPORTED = 10;
+               S5PC11X_MAXFREQLEVEL = 12;
+               MAXFREQ_LEVEL_SUPPORTED = 13;
                g_dvfs_high_lock_limit = 12;
 
         printk("S5PC11X_FREQ_TAB=%d , S5PC11X_MAXFREQLEVEL=%d\n",S5PC11X_FREQ_TAB,S5PC11X_MAXFREQLEVEL);

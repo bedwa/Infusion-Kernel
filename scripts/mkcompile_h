@@ -64,8 +64,8 @@ UTS_TRUNCATE="cut -b -$UTS_LEN"
   echo \#define UTS_VERSION \"`echo $UTS_VERSION | $UTS_TRUNCATE`\"
 
   echo \#define LINUX_COMPILE_TIME \"`date +%T`\"
-  echo \#define LINUX_COMPILE_BY \"Infusion-Kernel\"
-  echo \#define LINUX_COMPILE_HOST \"`hostname | $UTS_TRUNCATE`\"
+  echo \#define LINUX_COMPILE_BY \"Bedwa\"
+  echo \#define LINUX_COMPILE_HOST \"Infusion 1.5\"
 
   if [ -x /bin/dnsdomainname ]; then
     domain=`dnsdomainname 2> /dev/null`
