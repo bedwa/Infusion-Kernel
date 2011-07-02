@@ -52,12 +52,31 @@ u32 ACTimingRegisterData1 = 0;
 
 u32 modTimingRegister0 = 0;
 u32 modTimingRegister1 = 0;
+u32 modMemoryControlRegister0 = 0;
+u32 modMemoryControlRegister1 = 0;
 u32 modACTimingRegisterRow0 = 0;
 u32 modACTimingRegisterRow1 = 0;
 u32 modACTimingRegisterData0 = 0;
 u32 modACTimingRegisterData1 = 0;
 
-
+extern unsigned int frequency_match_1GHZ[][4];
+extern unsigned int frequency_voltage_tab[][3];
+extern struct cpufreq_frequency_table s5pc110_freq_table_1GHZ[];
+extern unsigned int frequency_voltage_tab[][3];
+extern u32 free_freq_values_table[][10];
+extern u32 free_freq_levels;
+struct S5PC110_clk_info {
+  u32  armclk;
+  u32   apllout;
+  u32   mpllout;
+  u32  apll_mps;
+  u32  mpll_mps;
+  u32  msys_div0;
+  u32  psys_dsys_div0;
+  u32  div2val;
+  u32  dmc0_div6;
+};
+extern struct S5PC110_clk_info clk_info[];
 
 /**
  * The "cpufreq driver" - the arch- or hardware-dependent low
@@ -793,9 +812,9 @@ return sprintf(buf, "%d %d\n", ControllerControlRegister0,ControllerControlRegis
 
 static ssize_t show_memory_control_registers(struct cpufreq_policy *policy, char *buf)
 {
-return sprintf(buf, "%d %d\n", MemoryControlRegister0,MemoryControlRegister1);
-// return -EINVAL;
-}
+  return sprintf(buf, "%d %d/n", MemoryControlRegister0,MemoryControlRegister1);
+//    return -EINVAL;
+  }
 
 static ssize_t show_AC_timing_registers_row(struct cpufreq_policy *policy, char *buf)
 {
@@ -813,6 +832,19 @@ static ssize_t show_timing_registers(struct cpufreq_policy *policy, char *buf)
 {
 return sprintf(buf, "%d %d\n", TimingRegister0,TimingRegister1);
 // return -EINVAL;
+}
+
+static ssize_t store_memory_control_registers(struct cpufreq_policy *policy,
+          const char *buf, size_t count)
+{
+  unsigned int ret = -EINVAL;
+  ret = sscanf(buf, "%d %d", &MemoryControlRegister0,&MemoryControlRegister1);
+        modMemoryControlRegister0 = MemoryControlRegister0;
+        modMemoryControlRegister1 = MemoryControlRegister1;
+  if (ret != 1)
+    return -EINVAL;
+  else 
+    return count;
 }
 
 static ssize_t store_AC_timing_registers_row(struct cpufreq_policy *policy,
@@ -896,6 +928,169 @@ return count;
 
 }
 
+static ssize_t show_user_free_freq_levels(struct cpufreq_policy *policy, char *buf)
+{
+  return sprintf(buf, "%d\n", free_freq_levels);
+//  return -EINVAL;
+}
+
+static ssize_t show_user_free_freq_values_table_L0(struct cpufreq_policy *policy, char *buf)
+{
+  return sprintf(buf, "%d %d %d %d %d %d %d %d %d %d\n", free_freq_values_table[0][0],free_freq_values_table[0][1],free_freq_values_table[0][2],free_freq_values_table[0][3],free_freq_values_table[0][4],free_freq_values_table[0][5],free_freq_values_table[0][6],free_freq_values_table[0][7],free_freq_values_table[0][8],free_freq_values_table[0][9]);
+//  return -EINVAL;
+}
+
+
+static ssize_t show_user_free_freq_values_table_L1(struct cpufreq_policy *policy, char *buf)
+{
+  return sprintf(buf, "%d %d %d %d %d %d %d %d %d %d\n", free_freq_values_table[1][0],free_freq_values_table[1][1],free_freq_values_table[1][2],free_freq_values_table[1][3],free_freq_values_table[1][4],free_freq_values_table[1][5],free_freq_values_table[1][6],free_freq_values_table[1][7],free_freq_values_table[1][8],free_freq_values_table[1][9]);
+//  return -EINVAL;
+}
+
+static ssize_t show_user_free_freq_values_table_L2(struct cpufreq_policy *policy, char *buf)
+{
+  return sprintf(buf, "%d %d %d %d %d %d %d %d %d %d\n", free_freq_values_table[2][0],free_freq_values_table[2][1],free_freq_values_table[2][2],free_freq_values_table[2][3],free_freq_values_table[2][4],free_freq_values_table[2][5],free_freq_values_table[2][6],free_freq_values_table[2][7],free_freq_values_table[2][8],free_freq_values_table[2][9]);
+//  return -EINVAL;
+}
+
+
+
+static ssize_t show_user_free_freq_values_table_L3(struct cpufreq_policy *policy, char *buf)
+{
+  return sprintf(buf, "%d %d %d %d %d %d %d %d %d %d\n", free_freq_values_table[3][0],free_freq_values_table[3][1],free_freq_values_table[3][2],free_freq_values_table[3][3],free_freq_values_table[3][4],free_freq_values_table[3][5],free_freq_values_table[3][6],free_freq_values_table[3][7],free_freq_values_table[3][8],free_freq_values_table[3][9]);
+//  return -EINVAL;
+}
+
+static ssize_t store_user_free_freq_values_table_L0(struct cpufreq_policy *policy,
+          const char *buf, size_t count)
+{
+  unsigned int ret = -EINVAL;
+
+  ret = sscanf(buf, "%d %d %d %d %d %d %d %d %d %d", &free_freq_values_table[0][0],&free_freq_values_table[0][1],&free_freq_values_table[0][2],&free_freq_values_table[0][3],&free_freq_values_table[0][4],&free_freq_values_table[0][5],&free_freq_values_table[0][6],&free_freq_values_table[0][7],&free_freq_values_table[0][8],&free_freq_values_table[0][9]);
+  
+  printk(KERN_NOTICE "%d %d %d %d %d %d %d %d %d %d %d", free_freq_values_table[0][0],free_freq_values_table[0][1],free_freq_values_table[0][2],free_freq_values_table[0][3],free_freq_values_table[0][4],free_freq_values_table[0][5],free_freq_values_table[0][6],free_freq_values_table[0][7],free_freq_values_table[0][8],free_freq_values_table[0][9],ret);
+    
+
+  clk_info[0].armclk  =  free_freq_values_table[0][0]* 1000;
+  clk_info[0].apllout  =  free_freq_values_table[0][0]* 1000;
+  clk_info[0].apll_mps  =  ((free_freq_values_table[0][1]<<16)|(free_freq_values_table[0][2]<<8)|free_freq_values_table[0][3]);
+  clk_info[0].msys_div0  =  (0|(free_freq_values_table[0][4]<<4)|(free_freq_values_table[0][5]<<8)|(free_freq_values_table[0][6]<<12));
+  clk_info[0].div2val  =  ((free_freq_values_table[0][7]<<0)|(free_freq_values_table[0][8]<<4)|(free_freq_values_table[0][9]<<8));
+
+  s5pc110_freq_table_1GHZ[0].frequency = free_freq_values_table[0][0]* 1000;
+  free_freq_values_table[0][0] = free_freq_values_table[0][0];
+  frequency_match_1GHZ[0][0] = free_freq_values_table[0][0];
+  frequency_voltage_tab[0][0] = free_freq_values_table[0][0] * 1000;
+
+        if(policy->user_policy.max < free_freq_values_table[0][0]* 1000)
+    policy->user_policy.max = free_freq_values_table[0][0]* 1000;        
+  if(policy->cpuinfo.max_freq < free_freq_values_table[0][0]* 1000)
+    policy->cpuinfo.max_freq = free_freq_values_table[0][0]* 1000;
+
+  //cpufreq_stats_update_freq(policy->cpu,0, free_freq_values_table[0][0]* 1000);
+            
+  if (ret != 1){
+    return -EINVAL;
+        }
+  else {
+    return count;
+  }
+
+}
+
+static ssize_t store_user_free_freq_values_table_L1(struct cpufreq_policy *policy,
+          const char *buf, size_t count)
+{
+  unsigned int ret = -EINVAL;
+
+  ret = sscanf(buf, "%d %d %d %d %d %d %d %d %d %d", &free_freq_values_table[1][0],&free_freq_values_table[1][1],&free_freq_values_table[1][2],&free_freq_values_table[1][3],&free_freq_values_table[1][4],&free_freq_values_table[1][5],&free_freq_values_table[1][6],&free_freq_values_table[1][7],&free_freq_values_table[1][8],&free_freq_values_table[1][9]);
+
+  printk(KERN_NOTICE "%d %d %d %d %d %d %d %d %d %d %d", free_freq_values_table[1][0],free_freq_values_table[1][1],free_freq_values_table[1][2],free_freq_values_table[1][3],free_freq_values_table[1][4],free_freq_values_table[1][5],free_freq_values_table[1][6],free_freq_values_table[1][7],free_freq_values_table[1][8],free_freq_values_table[1][9],ret);
+
+  clk_info[1].armclk  =  free_freq_values_table[1][0]* 1000;
+  clk_info[1].apllout  =  free_freq_values_table[1][0]* 1000;
+  clk_info[1].apll_mps  =  ((free_freq_values_table[1][1]<<16)|(free_freq_values_table[1][2]<<8)|free_freq_values_table[1][3]);
+  clk_info[1].msys_div0  =  (0|(free_freq_values_table[1][4]<<4)|(free_freq_values_table[1][5]<<8)|(free_freq_values_table[1][6]<<12));
+  clk_info[1].div2val  =  ((free_freq_values_table[1][7]<<0)|(free_freq_values_table[1][8]<<4)|(free_freq_values_table[1][9]<<8));
+
+  s5pc110_freq_table_1GHZ[1].frequency = free_freq_values_table[1][0]* 1000;
+  free_freq_values_table[1][0] = free_freq_values_table[1][0];
+  frequency_match_1GHZ[1][0] = free_freq_values_table[1][0];
+  frequency_voltage_tab[1][0] = free_freq_values_table[1][0] * 1000;
+
+  //cpufreq_stats_update_freq(policy->cpu,1, free_freq_values_table[1][0]* 1000);
+
+  if (ret != 1){
+    return -EINVAL;
+        }
+  else {
+    return count;
+  }
+
+}
+
+
+static ssize_t store_user_free_freq_values_table_L2(struct cpufreq_policy *policy,
+          const char *buf, size_t count)
+{
+  unsigned int ret = -EINVAL;
+
+  ret = sscanf(buf, "%d %d %d %d %d %d %d %d %d %d", &free_freq_values_table[2][0],&free_freq_values_table[2][1],&free_freq_values_table[2][2],&free_freq_values_table[2][3],&free_freq_values_table[2][4],&free_freq_values_table[2][5],&free_freq_values_table[2][6],&free_freq_values_table[2][7],&free_freq_values_table[2][8],&free_freq_values_table[2][9]);
+
+  printk(KERN_NOTICE "%d %d %d %d %d %d %d %d %d %d %d", free_freq_values_table[2][0],free_freq_values_table[2][1],free_freq_values_table[2][2],free_freq_values_table[2][3],free_freq_values_table[2][4],free_freq_values_table[2][5],free_freq_values_table[2][6],free_freq_values_table[2][7],free_freq_values_table[2][8],free_freq_values_table[2][9],ret);
+
+  clk_info[2].armclk  =  free_freq_values_table[2][0]* 1000;
+  clk_info[2].apllout  =  free_freq_values_table[2][0]* 1000;
+  clk_info[2].apll_mps  =  ((free_freq_values_table[2][1]<<16)|(free_freq_values_table[2][2]<<8)|free_freq_values_table[2][3]);
+  clk_info[2].msys_div0  =  (0|(free_freq_values_table[2][4]<<4)|(free_freq_values_table[2][5]<<8)|(free_freq_values_table[2][6]<<12));
+  clk_info[2].div2val  =  ((free_freq_values_table[2][7]<<0)|(free_freq_values_table[2][8]<<4)|(free_freq_values_table[2][9]<<8));
+
+  s5pc110_freq_table_1GHZ[2].frequency = free_freq_values_table[2][0]* 1000;
+  free_freq_values_table[2][0] = free_freq_values_table[2][0];
+  frequency_match_1GHZ[2][0] = free_freq_values_table[2][0];
+  frequency_voltage_tab[2][0] = free_freq_values_table[2][0] * 1000;
+
+  //cpufreq_stats_update_freq(policy->cpu,2, free_freq_values_table[2][0]* 1000);
+
+  if (ret != 1){
+    return -EINVAL;
+        }
+  else {
+    return count;
+  }
+
+}
+
+static ssize_t store_user_free_freq_values_table_L3(struct cpufreq_policy *policy,
+          const char *buf, size_t count)
+{
+  unsigned int ret = -EINVAL;
+
+  ret = sscanf(buf, "%d %d %d %d %d %d %d %d %d %d", &free_freq_values_table[3][0],&free_freq_values_table[3][1],&free_freq_values_table[3][2],&free_freq_values_table[3][3],&free_freq_values_table[3][4],&free_freq_values_table[3][5],&free_freq_values_table[3][6],&free_freq_values_table[3][7],&free_freq_values_table[3][8],&free_freq_values_table[3][9]);
+
+  printk(KERN_NOTICE "%d %d %d %d %d %d %d %d %d %d %d", free_freq_values_table[3][0],free_freq_values_table[3][1],free_freq_values_table[3][2],free_freq_values_table[3][3],free_freq_values_table[3][4],free_freq_values_table[3][5],free_freq_values_table[3][6],free_freq_values_table[3][7],free_freq_values_table[3][8],free_freq_values_table[3][9],ret);
+
+  clk_info[3].armclk  =  free_freq_values_table[3][0]* 1000;
+  clk_info[3].apllout  =  free_freq_values_table[3][0]* 1000;
+  clk_info[3].apll_mps  =  ((free_freq_values_table[3][1]<<16)|(free_freq_values_table[3][2]<<8)|free_freq_values_table[3][3]);
+  clk_info[3].msys_div0  =  (0|(free_freq_values_table[3][4]<<4)|(free_freq_values_table[3][5]<<8)|(free_freq_values_table[3][6]<<12));
+  clk_info[3].div2val  =  ((free_freq_values_table[3][7]<<0)|(free_freq_values_table[3][8]<<4)|(free_freq_values_table[3][9]<<8));
+
+  s5pc110_freq_table_1GHZ[3].frequency = free_freq_values_table[3][0]* 1000;
+  free_freq_values_table[3][0] = free_freq_values_table[3][0];
+  frequency_match_1GHZ[3][0] = free_freq_values_table[3][0];
+  frequency_voltage_tab[3][0] = free_freq_values_table[3][0] * 1000;
+
+  //cpufreq_stats_update_freq(policy->cpu,3, free_freq_values_table[3][0]* 1000);
+
+  if (ret != 1){
+    return -EINVAL;
+        }
+  else {
+    return count;
+  }
+}
+
 #define define_one_ro(_name) \
 static struct freq_attr _name = \
 __ATTR(_name, 0444, show_##_name, NULL)
@@ -918,7 +1113,7 @@ define_one_ro(scaling_cur_freq);
 define_one_ro(related_cpus);
 define_one_ro(affected_cpus);
 define_one_ro(controller_control_registers);
-define_one_ro(memory_control_registers);
+define_one_rw(memory_control_registers);
 define_one_rw(scaling_min_freq);
 define_one_rw(scaling_max_freq);
 define_one_rw(scaling_governor);
@@ -929,6 +1124,12 @@ define_one_rw(timing_registers);
 define_one_rw(AC_timing_registers_row);
 define_one_rw(AC_timing_registers_data);
 define_one_ro(frequency_voltage_table);
+define_one_ro(user_free_freq_levels);
+
+define_one_rw(user_free_freq_values_table_L0);
+define_one_rw(user_free_freq_values_table_L1);
+define_one_rw(user_free_freq_values_table_L2);
+define_one_rw(user_free_freq_values_table_L3);
 /*
 define_one_rw(ControllerControlRegister0);
 define_one_rw(ControllerControlRegister1);
@@ -950,13 +1151,17 @@ static struct attribute *default_attrs[] = {
 	&scaling_governor.attr,
         &UV_mV_table.attr,
         &states_enabled_table.attr,
-              &update_states.attr,
         &frequency_voltage_table.attr,
         &controller_control_registers.attr,
         &timing_registers.attr,
         &AC_timing_registers_row.attr,
         &memory_control_registers.attr,
         &AC_timing_registers_data.attr,
+	&user_free_freq_levels.attr,
+        &user_free_freq_values_table_L0.attr,
+        &user_free_freq_values_table_L1.attr,
+        &user_free_freq_values_table_L2.attr,
+        &user_free_freq_values_table_L3.attr,
 	&scaling_driver.attr,
 	&scaling_available_governors.attr,
 	&scaling_setspeed.attr,

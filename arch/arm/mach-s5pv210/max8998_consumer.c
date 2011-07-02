@@ -52,11 +52,8 @@ unsigned int S5PC11X_VOLTAGE_TAB;
 #endif
 #endif
 
-#if defined (USE_1DOT2GH) //Rajucm
-#undef DECREASE_DVFS_DELAY
-#else
+
 #define DECREASE_DVFS_DELAY
-#endif
 
 #ifdef DECREASE_DVFS_DELAY
 #define PMIC_SET_MASK   (0x38) //(0x7 << 3)
@@ -69,12 +66,17 @@ unsigned int S5PC11X_VOLTAGE_TAB;
 #define PMIC_SET2_HIGH	(0x10)	//(0x1 << 4)
 #endif
 
+int curr_frequency;
+
+extern u32 free_freq_values_table[][10];
+extern u32 free_freq_levels;
+
 #ifndef CONFIG_CPU_FREQ
 unsigned int S5PC11X_FREQ_TAB = 1;
 #endif
 
 #define RAMP_RATE 10 // 10mv/usec
-unsigned int step_curr;
+unsigned int step_curr = 1600000;
 
 #if defined (CONFIG_S5PC110_VIBRANTPLUS_BOARD)
 extern unsigned int VPLUSVER ;
@@ -101,7 +103,7 @@ enum PMIC_VOLTAGE {
 
 
 /* frequency voltage matching table */
-static const unsigned int frequency_match_1GHZ[][4] = {
+unsigned int frequency_match_1GHZ[][4] = {
 /* frequency, Mathced VDD ARM voltage , Matched VDD INT*/
 #if 1
 #if defined (USE_1DOT2GH) //Rajucm
@@ -159,7 +161,7 @@ unsigned int frequency_voltage_tab[][3] = {
         {100000, 950, 950},
 };
 
-static const unsigned int frequency_match_800MHZ[][4] = {
+static unsigned int frequency_match_800MHZ[][4] = {
 /* frequency, Mathced VDD ARM voltage , Matched VDD INT*/
         {800000, 1200, 1100, 0},
         {400000, 1050, 1100, 1},
@@ -167,7 +169,7 @@ static const unsigned int frequency_match_800MHZ[][4] = {
         {100000, 950, 1000, 4},
 };
 #if !defined (USE_1DOT2GH)//Rajucm
-const unsigned int (*frequency_match[2])[4] = {
+unsigned int (*frequency_match[2])[4] = {
         frequency_match_1GHZ,
         frequency_match_800MHZ,
 };
@@ -183,7 +185,7 @@ static const unsigned int voltage_table[16] = {
 #endif
 
 #if defined (USE_1DOT2GH) //Rajucm
-static const unsigned int frequency_match_1DOT2GHZ_ASV0[][4] = {
+unsigned int frequency_match_1DOT2GHZ_ASV0[][4] = {
 /* frequency, Mathced VDD ARM voltage , Matched VDD INT*/
 	{1600000, 1450, 1100, 0},
 	{1500000, 1400, 1100, 1},
@@ -200,7 +202,7 @@ static const unsigned int frequency_match_1DOT2GHZ_ASV0[][4] = {
         {100000, 950, 1000, 12},
 };
 
-static const unsigned int frequency_match_1DOT2GHZ_ASV1[][4] = {
+unsigned int frequency_match_1DOT2GHZ_ASV1[][4] = {
 /* frequency, Mathced VDD ARM voltage , Matched VDD INT*/
 	{1600000, 1450, 1100, 0},
 	{1500000, 1400, 1100, 1},
@@ -217,7 +219,7 @@ static const unsigned int frequency_match_1DOT2GHZ_ASV1[][4] = {
         {100000, 950, 1000, 12},
 };
 
-static const unsigned int frequency_match_1DOT2GHZ_ASV2[][4] = {
+unsigned int frequency_match_1DOT2GHZ_ASV2[][4] = {
 /* frequency, Mathced VDD ARM voltage , Matched VDD INT*/
 	{1600000, 1450, 1100, 0},
 	{1500000, 1400, 1100, 1},
@@ -244,6 +246,26 @@ const unsigned int (*frequency_match[4])[4] = {
 
 extern unsigned int S5PC11X_FREQ_TAB;
 //extern const unsigned int (*frequency_match[2])[4];
+
+extern u32 ControllerControlRegister0;
+extern u32 ControllerControlRegister1;
+extern u32 MemoryControlRegister0;
+extern u32 MemoryControlRegister1;
+extern u32 TimingRegister0;
+extern u32 TimingRegister1;
+extern u32 ACTimingRegisterRow0;
+extern u32 ACTimingRegisterRow1;
+extern u32 ACTimingRegisterData0;
+extern u32 ACTimingRegisterData1;
+
+extern u32 modTimingRegister0;
+extern u32 modTimingRegister1;
+extern u32 modMemoryControlRegister0;
+extern u32 modMemoryControlRegister1;
+extern u32 modACTimingRegisterRow0;
+extern u32 modACTimingRegisterRow1;
+extern u32 modACTimingRegisterData0;
+extern u32 modACTimingRegisterData1;
 
 static struct regulator *Reg_Arm = NULL, *Reg_Int = NULL;
 
@@ -445,39 +467,236 @@ void dvs_set_for_1dot2Ghz (int onoff) {
 }
 #endif //USE_1DOT2GH
 
-extern int exp_UV_mV[6];
+extern int exp_UV_mV[13];
+
+//Controller Control Register (ConControl, R/W, Address = 0xF000_0000, 0xF140_0000)
+u32 readControllerControlRegister0(int param){
+ return __raw_readl(S5P_VA_DMC0);
+}
+
+u32 readControllerControlRegister1(int param){
+ return __raw_readl(S5P_VA_DMC1);
+}
+
+//Memory Control Register (MemControl, R/W, Address = 0xF000_0004, 0xF140_0004)
+u32 readMemoryControlRegister0(int param){
+ return __raw_readl(S5P_VA_DMC0 + 0x04);
+}
+
+u32 readMemoryControlRegister1(int param){
+ return __raw_readl(S5P_VA_DMC1 + 0x04);
+}
+
+//AC Timing Register for Auto Refresh of memory (TimingAref, R/W, Address = 0xF000_0030,0xF140_0030)
+u32 readTimingRegister0(int param){
+ return __raw_readl(S5P_VA_DMC0 + 0x30);
+}
+
+u32 readTimingRegister1(int param){
+ return __raw_readl(S5P_VA_DMC1 + 0x30);
+}
+
+//AC Timing Register for the Row of memory (TimingRow, R/W, Address = 0xF000_0034,0xF140_0034)
+u32 readACTimingRegisterRow0(int param){
+ return __raw_readl(S5P_VA_DMC0 + 0x34);
+}
+
+u32 readACTimingRegisterRow1(int param){
+ return __raw_readl(S5P_VA_DMC1 + 0x34);
+}
+
+//AC Timing Register for the Data of memory (TimingData, R/W, Address = 0xF000_0038,0xF140_0038)
+u32 readACTimingRegisterData0(int param){
+ return __raw_readl(S5P_VA_DMC0 + 0x38);
+}
+
+u32 readACTimingRegisterData1(int param){
+ return __raw_readl(S5P_VA_DMC1 + 0x38);
+}
+
+//write
+//Controller Control Register (ConControl, R/W, Address = 0xF000_0000, 0xF140_0000)
+void writeControllerControlRegister0(u32 val){
+  __raw_writel(val,S5P_VA_DMC0);
+}
+
+void writeControllerControlRegister1(u32 val){
+  __raw_writel(val,S5P_VA_DMC1);
+}
+
+//Memory Control Register (MemControl, R/W, Address = 0xF000_0004, 0xF140_0004)
+void writeMemoryControlRegister0(u32 val){
+  __raw_writel(val,S5P_VA_DMC0 + 0x04);
+}
+
+void writeMemoryControlRegister1(u32 val){
+  __raw_writel(val,S5P_VA_DMC1 + 0x04);
+}
+
+//AC Timing Register for Auto Refresh of memory (TimingAref, R/W, Address = 0xF000_0030,0xF140_0030)
+void writeTimingRegister0(u32 val){
+  __raw_writel(val,S5P_VA_DMC0 + 0x30);
+}
+
+void writeTimingRegister1(u32 val){
+  __raw_writel(val,S5P_VA_DMC1 + 0x30);
+}
+
+//AC Timing Register for the Row of memory (TimingRow, R/W, Address = 0xF000_0034,0xF140_0034)
+void writeACTimingRegisterRow0(u32 val){
+  __raw_writel(val,S5P_VA_DMC0 + 0x34);
+}
+
+void writeACTimingRegisterRow1(u32 val){
+  __raw_writel(val,S5P_VA_DMC1 + 0x34);
+}
+
+//AC Timing Register for the Data of memory (TimingData, R/W, Address = 0xF000_0038,0xF140_0038)
+void writeACTimingRegisterData0(u32 val){
+  __raw_writel(val,S5P_VA_DMC0 + 0x38);
+}
+
+void writeACTimingRegisterData1(u32 val){
+  __raw_writel(val,S5P_VA_DMC1 + 0x38);
+}
+
+static void writeMemoryData(int param){
+
+	if(modTimingRegister0 != 0){
+		writeTimingRegister0(modTimingRegister0);
+		modTimingRegister0 = 0;
+	}
+	if(modTimingRegister1 != 0){
+		writeTimingRegister1(modTimingRegister1);
+		modTimingRegister1 = 0;
+	}
+
+	if(modMemoryControlRegister0 != 0){
+		writeMemoryControlRegister0(modMemoryControlRegister0);
+		modMemoryControlRegister0 = 0;
+	}
+	if(modMemoryControlRegister1 != 0){
+		writeMemoryControlRegister1(modMemoryControlRegister1);
+		modMemoryControlRegister1 = 0;
+	}
+
+	if(modACTimingRegisterRow0 != 0){
+		writeACTimingRegisterRow0(modACTimingRegisterRow0);
+		modACTimingRegisterRow0 = 0;
+	}
+	if(modACTimingRegisterRow1 != 0){
+		writeACTimingRegisterRow1(modACTimingRegisterRow1);
+		modACTimingRegisterRow1 = 0;
+	}
+
+	if(modACTimingRegisterData0 != 0){
+	        writeACTimingRegisterData0(modACTimingRegisterData0);
+		modACTimingRegisterData0 = 0;
+	}
+	if(modACTimingRegisterData1 != 0){
+		writeACTimingRegisterData1(modACTimingRegisterData1);
+		modACTimingRegisterData1 = 0;
+	}
+}
+
+static void readMemoryData(int param){
+u32 reg_value;
+
+reg_value = readControllerControlRegister0(0);
+if(ControllerControlRegister0 != reg_value)
+	ControllerControlRegister0 = reg_value;
+
+reg_value = readControllerControlRegister1(0);
+if(ControllerControlRegister1 != reg_value)
+	ControllerControlRegister1 = reg_value;
+
+reg_value = readMemoryControlRegister0(0);
+if(MemoryControlRegister0 != reg_value)
+	MemoryControlRegister0 = reg_value;
+
+reg_value = readMemoryControlRegister1(0);
+if(MemoryControlRegister1 != reg_value)
+	MemoryControlRegister1 = reg_value;
+
+reg_value = readTimingRegister0(0);
+if(TimingRegister0 != reg_value)
+	TimingRegister0 = reg_value;
+
+reg_value = readTimingRegister1(0);
+if(TimingRegister1 != reg_value)
+	TimingRegister1 = reg_value;
+
+reg_value = readACTimingRegisterRow0(0);
+if(ACTimingRegisterRow0 != reg_value)
+	ACTimingRegisterRow0 = reg_value;
+
+reg_value = readACTimingRegisterRow1(0);
+if(ACTimingRegisterRow1 != reg_value)
+	ACTimingRegisterRow1 = reg_value;
+
+reg_value = readACTimingRegisterData0(0);
+if(ACTimingRegisterData0 != reg_value)
+	ACTimingRegisterData0 = reg_value;
+
+reg_value = readACTimingRegisterData1(0);
+if(ACTimingRegisterData1 != reg_value)
+	ACTimingRegisterData1 = reg_value;
+}
+
 
 static int set_max8998(unsigned int pwr, enum perf_level p_lv)
 {
 	int voltage;
 	int pmic_val;
 	int ret = 0;
-#if defined (USE_1DOT2GH) //Rajucm
-	const unsigned int (*frequency_match_tab)[4] = frequency_match[S5PC11X_VOLTAGE_TAB];	
-#else
-	const unsigned int (*frequency_match_tab)[4] = frequency_match[S5PC11X_FREQ_TAB];	
-#endif
+	unsigned int (*frequency_match_tab)[4] = frequency_match[S5PC11X_FREQ_TAB];	
+		writeMemoryData(0);
+	readMemoryData(0);
 //	DBG("%s : p_lv = %d : pwr = %d \n", __FUNCTION__, p_lv,pwr);
 
 	if(pwr == PMIC_ARM) {
 
-#if defined (CONFIG_S5PC110_VIBRANTPLUS_BOARD)
-//		if (VPLUSVER) T959P has no voltage drop in dvfs
-		voltage = frequency_match_tab[p_lv][pwr + 1]+50;
-//		else
-//			voltage = frequency_match_tab[p_lv][pwr + 1]+125;
-#else
+		curr_frequency = frequency_match_tab[p_lv][pwr];
+
 //		voltage = frequency_match_tab[p_lv][pwr + 1];
-		voltage = frequency_match_tab[p_lv][pwr + 1] - exp_UV_mV[p_lv]; 
-#endif
+		voltage = frequency_match_tab[p_lv][pwr + 1] - (exp_UV_mV[p_lv]); 
+
+		if(frequency_voltage_tab[p_lv][2] != voltage)
+                	frequency_voltage_tab[p_lv][2] = voltage;
 
 		if(voltage == s_arm_voltage)
 			return ret;
 
+		switch(p_lv)
+	    {
+		case L0:
+		case L1:
+		case L2:
+		case L3:
+		case L4:
+		case L5:
+		case L6:
+		case L7:
+		    max8998_set_dvsarm_direct(DVSARM1, voltage);
+		    break;
+		case L8:
+		case L9:
+		    max8998_set_dvsarm_direct(DVSARM2, voltage);
+		    break;
+		case L10:
+		    max8998_set_dvsarm_direct(DVSARM3, voltage);
+		    break;
+		case L11:
+		case L12:
+		    max8998_set_dvsarm_direct(DVSARM4, voltage);
+		    break;
+		}
+
 		pmic_val = voltage * 1000;
 		
 //		DBG("regulator_set_voltage =%d\n",voltage);
-		DBG("regulator_set_voltage =%dmA @ %dMHz-%d UV=%d\n",voltage,frequency_match_tab[p_lv][pwr]/1000,p_lv,exp_UV_mV[p_lv]);
+               // printk(KERN_NOTICE "regulator_set_voltage =%dmA @ %dMHz-%d UV=%d\n",voltage,frequency_match_tab[p_lv][pwr]/1000,p_lv,exp_UV_mV[p_lv]);
+//		DBG("regulator_set_voltage =%dmA @ %dMHz-%d UV=%d\n",voltage,frequency_match_tab[p_lv][pwr]/1000,p_lv,exp_UV_mV[p_lv]);
 		/*set Arm voltage*/
 		ret = regulator_set_voltage(Reg_Arm,pmic_val,pmic_val);
 	        if(ret != 0)
@@ -496,22 +715,14 @@ static int set_max8998(unsigned int pwr, enum perf_level p_lv)
 		
 	} else if(pwr == PMIC_INT) {
 
-#if defined (CONFIG_S5PC110_VIBRANTPLUS_BOARD)
-//		if (VPLUSVER) T959P has no voltage drop in dvfs
 		voltage = frequency_match_tab[p_lv][pwr + 1];
-//		else
-//			voltage = frequency_match_tab[p_lv][pwr + 1]+50;
-#else	
-//		voltage = frequency_match_tab[p_lv][pwr + 1];
-		voltage = frequency_match_tab[p_lv][pwr + 1] - exp_UV_mV[p_lv];
-#endif		
 		if(voltage == s_int_voltage)
                         return ret;
 
 		pmic_val = voltage * 1000;
 
 //		DBG("regulator_set_voltage = %d\n",voltage);
-		DBG("regulator_set_voltage =%dmA @ %dMHz-%d UV=%d\n",voltage,frequency_match_tab[p_lv][pwr]/1000,p_lv,exp_UV_mV[p_lv]);
+//		DBG("regulator_set_voltage =%dmA @ %dMHz-%d UV=%d\n",voltage,frequency_match_tab[p_lv][pwr]/1000,p_lv,exp_UV_mV[p_lv]);
 		/*set Arm voltage*/
 		ret = regulator_set_voltage(Reg_Int, pmic_val, pmic_val);
 	        if(ret != 0)
@@ -577,24 +788,59 @@ EXPORT_SYMBOL(set_voltage);
 #ifdef DECREASE_DVFS_DELAY
 int set_gpio_dvs(enum perf_level p_lv)
 {
+	unsigned int (*frequency_match_tab)[4] = frequency_match[S5PC11X_FREQ_TAB];
+
+	switch(p_lv)
+    {
+	case L0:
+	case L1:
+	case L2:
+	case L3:
+	case L4:
+	case L5:
+	case L6:
+	case L7:
+	    max8998_set_dvsarm_direct(DVSARM1, frequency_match_tab[p_lv][1]);
+	    break;
+	case L8:
+	case L9:
+	    max8998_set_dvsarm_direct(DVSARM2, frequency_match_tab[p_lv][1]);
+	    break;
+	case L10:
+	    max8998_set_dvsarm_direct(DVSARM3, frequency_match_tab[p_lv][1]);
+	    break;
+	case L11:
+	case L12:
+	    max8998_set_dvsarm_direct(DVSARM4, frequency_match_tab[p_lv][1]);
+	    break;
+	}
+
 	switch(p_lv)
     {
         case L0:
+        case L1:
+        case L2:
+        case L3:
+        case L4:
+        case L5:
+        case L6:
+        case L7:
             writel(((readl(S5PV210_GPH0DAT) & ~PMIC_SET_MASK)                                                ), S5PV210_GPH0DAT);
             break;
-        case L1:
+        case L8:
+        case L9:
             writel(((readl(S5PV210_GPH0DAT) & ~PMIC_SET_MASK) | PMIC_SET1_BIT                                ), S5PV210_GPH0DAT);
             break;
-        case L2:
+        case L10:
             writel(((readl(S5PV210_GPH0DAT) & ~PMIC_SET_MASK)                 | PMIC_SET2_BIT                ), S5PV210_GPH0DAT);
             break;
-        case L3:
+        case L11:
             writel(((readl(S5PV210_GPH0DAT) & ~PMIC_SET_MASK) | PMIC_SET1_BIT | PMIC_SET2_BIT                ), S5PV210_GPH0DAT);
             break;
-        case L4:
+        case L12:
             writel(((readl(S5PV210_GPH0DAT) & ~PMIC_SET_MASK) | PMIC_SET1_BIT | PMIC_SET2_BIT | PMIC_SET3_BIT), S5PV210_GPH0DAT);
             break;
-        default:
+         default:
             pr_err("[PWR] %s : Invalid parameters (%d)\n", __func__, p_lv);
             return -EINVAL;
 	}
@@ -655,7 +901,7 @@ int set_voltage_dvs(enum perf_level p_lv)
 {
 #ifdef DECREASE_DVFS_DELAY
 	unsigned int delay, arm_delay, int_delay;
-	const unsigned int (*frequency_match_tab)[4] = frequency_match[S5PC11X_FREQ_TAB];
+	unsigned int (*frequency_match_tab)[4] = frequency_match[S5PC11X_FREQ_TAB];
 
 	if((step_curr == p_lv) && dvs_initilized)
 		return 0;
@@ -675,19 +921,15 @@ int set_voltage_dvs(enum perf_level p_lv)
 	set_gpio_dvs(p_lv);
 	udelay(delay);
 
-	DBG("[PWR] %s : level (%d -> %d), delay (%u)\n", __func__, step_curr, p_lv, delay);
+	DBG("[PWR] %s : level (%d -> %d), delay (%u)\n", __func__, frequency_match_tab[step_curr][0], frequency_match_tab[p_lv][0], delay); //jj
 
 	step_curr = p_lv;
 
 	return 0;
 #else
 	unsigned int new_voltage, old_voltage; 
-#if defined (USE_1DOT2GH) //Rajucm
-	const unsigned int (*dvs_volt_table_ptr)[3] = dvs_volt_table[S5PC11X_VOLTAGE_TAB];
-	unsigned int (*dvs_arm_voltage_set)[2] = dvs_arm_voltage_set_table[S5PC11X_VOLTAGE_TAB];
-#else
+
 	const unsigned int (*dvs_volt_table_ptr)[3] = dvs_volt_table[S5PC11X_FREQ_TAB];
-#endif
 
 	DBG("%s : p_lv = %d\n", __FUNCTION__, p_lv);
 	if((step_curr == p_lv) && dvs_initilized)
@@ -742,49 +984,15 @@ void max8998_init(void)
 
 EXPORT_SYMBOL(max8998_init);
 
-#if defined (USE_1DOT2GH) //Rajucm
-static void max8998_init_dvs_registers()
-{
-	unsigned int (*dvs_arm_voltage_set)[2] = dvs_arm_voltage_set_table[S5PC11X_VOLTAGE_TAB];
-	//printk(" $#KSOO$# Function=%s, voltage_tabl = %d, ARM1=%d \n",__func__, S5PC11X_VOLTAGE_TAB, dvs_arm_voltage_set[0][1]);
-
-	/*initialise the dvs registers*/
-	max8998_set_dvsarm_direct(DVSARM1, dvs_arm_voltage_set[0][1]);
-	max8998_set_dvsarm_direct(DVSARM2, dvs_arm_voltage_set[1][1]);
-	max8998_set_dvsarm_direct(DVSARM3, dvs_arm_voltage_set[2][1]);
-	max8998_set_dvsarm_direct(DVSARM4, dvs_arm_voltage_set[3][1]);
-	max8998_set_dvsint_direct(DVSINT1, dvs_arm_voltage_set[4][1]);
-	max8998_set_dvsint_direct(DVSINT2, dvs_arm_voltage_set[5][1]);
-
-}
-#endif
 
 static int max8998_consumer_probe(struct platform_device *pdev)
 {
         int ret = 0;
 #ifdef DECREASE_DVFS_DELAY
 	const unsigned int (*frequency_match_tab)[4] = frequency_match[S5PC11X_FREQ_TAB];
+	unsigned int (*dvs_arm_voltage_set)[2] = dvs_arm_voltage_set_table[S5PC11X_VOLTAGE_TAB];
 #endif
 
-#if defined (USE_1DOT2GH) //Rajucm
-	//unsigned int (*dvs_arm_voltage_set)[2] = dvs_arm_voltage_set_table[S5PC11X_VOLTAGE_TAB];
-	int regval=0;
-
-	if (S5PC11X_FREQ_TAB) {
-		regval = __raw_readl(S5P_VA_CHIPID + 0x10) & 0x1f;
-		if ((regval >= 1) && (regval <= 10))
-			S5PC11X_VOLTAGE_TAB = 1;
-		else if ((regval >= 11) && (regval <= 20))
-			S5PC11X_VOLTAGE_TAB = 2;
-		else if ((regval >= 21) && (regval <= 30))
-			S5PC11X_VOLTAGE_TAB = 3;
-		else
-			S5PC11X_VOLTAGE_TAB = 1;
-	} else {
-		S5PC11X_VOLTAGE_TAB = 0;
-	}
-printk ("$#KSOO$# freq_tabl=%d, voltage tab=%d, avs val=%d",S5PC11X_FREQ_TAB, S5PC11X_VOLTAGE_TAB, regval);	
-#endif
 	DBG(" Function=%s \n",__func__);
         Reg_Arm = regulator_get(NULL, "vddarm");
         if (IS_ERR(Reg_Arm)) {
@@ -800,38 +1008,13 @@ printk ("$#KSOO$# freq_tabl=%d, voltage tab=%d, avs val=%d",S5PC11X_FREQ_TAB, S5
 
 
 	/*initialise the dvs registers*/
-#if defined (USE_1DOT2GH) //Rajucm
-	max8998_init_dvs_registers();
-#else
 #ifdef DECREASE_DVFS_DELAY
-#if defined (CONFIG_S5PC110_VIBRANTPLUS_BOARD)
-//		if (VPLUSVER) T959P has no voltage drop in dvfs
-//		{
-			max8998_set_dvsarm_direct(DVSARM1, frequency_match_tab[0][1]+50);
-			max8998_set_dvsarm_direct(DVSARM2, frequency_match_tab[1][1]+50);
-			max8998_set_dvsarm_direct(DVSARM3, frequency_match_tab[2][1]+50);
-			max8998_set_dvsarm_direct(DVSARM4, frequency_match_tab[3][1]+50);
-			max8998_set_dvsint_direct(DVSINT1, frequency_match_tab[0][2]);
-			max8998_set_dvsint_direct(DVSINT2, frequency_match_tab[4][2]);
-//		}
-/*		else
-		{
-			max8998_set_dvsarm_direct(DVSARM1, frequency_match_tab[0][1]+125);
-			max8998_set_dvsarm_direct(DVSARM2, frequency_match_tab[1][1]+125);
-			max8998_set_dvsarm_direct(DVSARM3, frequency_match_tab[2][1]+125);
-			max8998_set_dvsarm_direct(DVSARM4, frequency_match_tab[3][1]+125);
-			max8998_set_dvsint_direct(DVSINT1, frequency_match_tab[0][2]+50);
-			max8998_set_dvsint_direct(DVSINT2, frequency_match_tab[4][2]+50);
-		}
-*/
-#else
-	max8998_set_dvsarm_direct(DVSARM1, frequency_match_tab[0][1]);
-	max8998_set_dvsarm_direct(DVSARM2, frequency_match_tab[1][1]);
-	max8998_set_dvsarm_direct(DVSARM3, frequency_match_tab[2][1]);
-	max8998_set_dvsarm_direct(DVSARM4, frequency_match_tab[3][1]);
-	max8998_set_dvsint_direct(DVSINT1, frequency_match_tab[0][2]);
-	max8998_set_dvsint_direct(DVSINT2, frequency_match_tab[4][2]);
-#endif
+    max8998_set_dvsarm_direct(DVSARM1, frequency_match_tab[6][1]);
+    max8998_set_dvsarm_direct(DVSARM2, frequency_match_tab[8][1]);
+    max8998_set_dvsarm_direct(DVSARM3, frequency_match_tab[10][1]);
+    max8998_set_dvsarm_direct(DVSARM4, frequency_match_tab[11][1]);
+    max8998_set_dvsint_direct(DVSINT1, frequency_match_tab[0][2]);
+    max8998_set_dvsint_direct(DVSINT2, frequency_match_tab[13][2]);
 #else
 	max8998_set_dvsarm_direct(DVSARM1, dvs_arm_voltage_set[0][1]);
 	max8998_set_dvsarm_direct(DVSARM2, dvs_arm_voltage_set[1][1]);
@@ -839,7 +1022,6 @@ printk ("$#KSOO$# freq_tabl=%d, voltage tab=%d, avs val=%d",S5PC11X_FREQ_TAB, S5
 	max8998_set_dvsarm_direct(DVSARM4, dvs_arm_voltage_set[3][1]);
 	max8998_set_dvsint_direct(DVSINT1, dvs_arm_voltage_set[4][1]);
 	max8998_set_dvsint_direct(DVSINT2, dvs_arm_voltage_set[5][1]);
-#endif
 #endif
 	/*Initialize the pmic voltage*/
 	max8998_init();
