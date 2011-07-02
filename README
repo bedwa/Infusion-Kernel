@@ -2,7 +2,7 @@
 
 1. Visit http://www.codesourcery.com/, download and install Sourcery G++ Lite 2009q3-68 toolchain for ARM EABI.
 
-2. Fork Infusion Kernel and froyo-sgh-i997-initramfs-hacked
+2. Fork Infusion Kernel and froyo-sgh-i997-initramfs-hacked (gtg465x)
 	http://help.github.com/fork-a-repo/
 
 4. Remove hidden directories and files (like .git and .gitignore (8 of these)) from your initramfs (froyo-sgh-i997-initramfs-hacked).
@@ -13,14 +13,17 @@
 
 7. Move into the top directory of the kernel source (linux_sgh-i997-hacked).
 
-8. Execute 'make bedwa_defconfig'.
+8. If you want init.d support, add "service sysinit /system/bin/logwrapper /system/xbin/busybox run-parts /system/etc/init.d
+  oneshot" to your init.rc in your initramfs and if you want insecure boot, swap secure.ro to =0 in your default.prop
 
-9. Execute 'make' or 'make -j<n>' where '<n>' is the number of multiple jobs to be invoked simultaneously.
+9. Execute 'make bedwa_defconfig'.
 
-10. If the kernel is built successfully, you will find the following file:
+10. Execute 'make' or 'make -j<n>' where '<n>' is the number of multiple jobs to be invoked simultaneously.
+
+11. If the kernel is built successfully, you will find the following file:
 	Infusion Kernel/arch/arm/boot/zImage
 
-11. If you would like to use the drivers you compiled instead of the included in my initramfs repo, search for .ko files in linux_sgh-i997-hacked, copy them to froyo-sgh-i997-initramfs-hacked/lib/modules, and then compile again.
+12. If you would like to use the drivers you compiled instead of the included in my initramfs repo, search for .ko files in linux_sgh-i997-hacked, copy them to froyo-sgh-i997-initramfs-hacked/lib/modules, and then compile again.
 
 
 	Linux kernel release 2.6.xx <http://kernel.org/>

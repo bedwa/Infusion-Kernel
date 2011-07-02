@@ -39,74 +39,6 @@
 #define MAX_DVFS_LEVEL  7
 extern unsigned int s5pc11x_cpufreq_index;
 
-#if 0
-/*APLL_FOUT, MPLL_FOUT, ARMCLK, HCLK_DSYS*/
-static const u32 s5p_sysout_clk_tab_1GHZ[][4] = {
-	// APLL:1000,ARMCLK:1000,HCLK_MSYS:200,MPLL:667,HCLK_DSYS:166,HCLK_PSYS:133,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
-	{1000* MHZ, 667 *MHZ, 1000 *MHZ, 166 *MHZ},
-	// APLL:800,ARMCLK:800,HCLK_MSYS:200,MPLL:667,HCLK_DSYS:166,HCLK_PSYS:133,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
-	{800* MHZ, 667 *MHZ, 800 *MHZ, 166 *MHZ},
-	// APLL:800,ARMCLK:400,HCLK_MSYS:200,MPLL:667,HCLK_DSYS:166,HCLK_PSYS:133,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
-	{800* MHZ, 667 *MHZ, 400 *MHZ, 166 *MHZ},
-	// APLL:800,ARMCLK:200,HCLK_MSYS:200,MPLL:667,HCLK_DSYS:166,HCLK_PSYS:133,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
-	{800* MHZ, 667 *MHZ, 200 *MHZ, 166 *MHZ},
-	// APLL:800,ARMCLK:100,HCLK_MSYS:100,MPLL:667,HCLK_DSYS:83,HCLK_PSYS:66,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
-	{800* MHZ, 667 *MHZ, 100 *MHZ, 133 *MHZ},
-};
-
-
-#define DIV_TAB_MAX_FIELD	12
-
-/*div0 ratio table*/
-/*apll, a2m, HCLK_MSYS, PCLK_MSYS, HCLK_DSYS, PCLK_DSYS, HCLK_PSYS, PCLK_PSYS, MFC_DIV, G3D_DIV, MSYS source(2D, 3D, MFC)(0->apll,1->mpll), DMC0 div*/
-static const u32 s5p_sys_clk_div0_tab_1GHZ[][DIV_TAB_MAX_FIELD] = {
-        {0, 4, 4, 1, 3, 1, 4, 1, 3, 3, 0, 3},
-        {0, 3, 3, 1, 3, 1, 4, 1, 3, 3, 0, 3},
-        {1, 3, 1, 1, 3, 1, 4, 1, 3, 3, 0, 3},
-        {3, 3, 0, 1, 3, 1, 4, 1, 3, 3, 0, 3},
-        {7, 3, 0, 0, 7, 0, 9, 0, 3, 3, 1, 4},
-};
-
-/*pms value table*/
-/*APLL(m, p, s), MPLL(m, p, s)*/
-static const u32 s5p_sys_clk_mps_tab_1GHZ[][6] = {
-        {125, 3, 1, 667, 12, 1},
-        {100, 3, 1, 667, 12, 1},
-        {100, 3, 1, 667, 12, 1},
-        {100, 3, 1, 667, 12, 1},
-        {100, 3, 1, 667, 12, 1},
-};
-
-
-/*APLL_FOUT, MPLL_FOUT, ARMCLK, HCLK_DSYS*/
-static const u32 s5p_sysout_clk_tab_1DOT2GHZ[][4] = {
-	// APLL:1200,ARMCLK:1200,HCLK_MSYS:200,MPLL:667,HCLK_DSYS:166,HCLK_PSYS:133,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
-	{1200* MHZ, 667 *MHZ, 1200 *MHZ, 166 *MHZ},
-	// APLL:1000,ARMCLK:1000,HCLK_MSYS:200,MPLL:667,HCLK_DSYS:166,HCLK_PSYS:133,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
-	{1000* MHZ, 667 *MHZ, 1000 *MHZ, 166 *MHZ},
-	// APLL:800,ARMCLK:800,HCLK_MSYS:200,MPLL:667,HCLK_DSYS:166,HCLK_PSYS:133,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
-	{800* MHZ, 667 *MHZ, 800 *MHZ, 166 *MHZ},
-	// APLL:800,ARMCLK:400,HCLK_MSYS:200,MPLL:667,HCLK_DSYS:166,HCLK_PSYS:133,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
-	{800* MHZ, 667 *MHZ, 400 *MHZ, 166 *MHZ},
-	// APLL:800,ARMCLK:200,HCLK_MSYS:200,MPLL:667,HCLK_DSYS:166,HCLK_PSYS:133,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
-	{800* MHZ, 667 *MHZ, 200 *MHZ, 166 *MHZ},
-	// APLL:800,ARMCLK:100,HCLK_MSYS:100,MPLL:667,HCLK_DSYS:83,HCLK_PSYS:66,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
-	{800* MHZ, 667 *MHZ, 100 *MHZ, 133 *MHZ},
-};
-
-
-/*div0 ratio table*/
-/*apll, a2m, HCLK_MSYS, PCLK_MSYS, HCLK_DSYS, PCLK_DSYS, HCLK_PSYS, PCLK_PSYS, MFC_DIV, G3D_DIV,MSYS source, DMC0 div*/
-static const u32 s5p_sys_clk_div0_tab_1DOT2GHZ[][DIV_TAB_MAX_FIELD] = {
-	{0, 5, 5, 1, 3, 1, 4, 1, 3, 3, 0, 3},
-        {0, 4, 4, 1, 3, 1, 4, 1, 3, 3, 0, 3},
-        {0, 3, 3, 1, 3, 1, 4, 1, 3, 3, 0, 3},
-        {1, 3, 1, 1, 3, 1, 4, 1, 3, 3, 0, 3},
-        {3, 3, 0, 1, 3, 1, 4, 1, 3, 3, 0, 3},
-        {7, 3, 0, 0, 7, 0, 9, 0, 3, 3, 1, 4},
-};
-
-#endif
 
 struct S5PC110_clk_info {
 	u32	armclk;
@@ -120,6 +52,11 @@ struct S5PC110_clk_info {
 	u32	dmc0_div6;
 };
 
+
+//armclk,mdiv,pdiv,sdiv,DIVA2M,DIVHCLKM,DIVPCLKM,DIVG2D,DIVMFC,DIVG3D
+//u32 free_freq_values_table[][10] = {{1250,625,12,1,6,6,1,3,3,3},{1300,325,6,1,6,6,1,3,3,3},{1350,675,12,1,6,6,1,3,3,3},{1400,350,6,1,6,6,1,3,3,3},};
+u32 free_freq_values_table[][10] = {{1600,400,6,1,7,7,1,4,4,4},{1500,375,6,1,7,7,1,4,4,4},{1400,350,6,1,7,7,1,3,3,3},{1300,325,6,1,7,7,1,3,3,3},};
+u32 free_freq_levels = 4;
 
 struct S5PC110_clk_info clk_info[] = {
 #if USE_1DOT2GHZ
@@ -189,7 +126,7 @@ struct S5PC110_clk_info clk_info[] = {
 	.dmc0_div6 	=	(3<<28),
 },
 {
-	// APLL:1100,ARMCLK:1000,HCLK_MSYS:200,MPLL:667,HCLK_DSYS:166,HCLK_PSYS:133,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
+	// APLL:1100,ARMCLK:1100,HCLK_MSYS:200,MPLL:667,HCLK_DSYS:166,HCLK_PSYS:133,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
 	.armclk		=	1100* MHZ,
 	.apllout	=	1100* MHZ,
 	.apll_mps	=	((280<<16)|(6<<8)|1),
@@ -287,35 +224,6 @@ struct S5PC110_clk_info clk_info[] = {
 }
 };
 
-#if 0
-/*pms value table*/
-/*APLL(m, p, s), MPLL(m, p, s)*/
-static const u32 s5p_sys_clk_mps_tab_1DOT2GHZ[][6] = {
-        {150, 3, 1, 667, 12, 1},
-        {125, 3, 1, 667, 12, 1},
-        {100, 3, 1, 667, 12, 1},
-        {100, 3, 1, 667, 12, 1},
-        {100, 3, 1, 667, 12, 1},
-        {100, 3, 1, 667, 12, 1},
-};
-
-
-static const u32 (*s5p_sysout_clk_tab_all[2])[4] = {
-        s5p_sysout_clk_tab_1GHZ,
-        s5p_sysout_clk_tab_1DOT2GHZ,
-};
-
-static const u32 (*s5p_sys_clk_div0_tab_all[2])[DIV_TAB_MAX_FIELD] = {
-        s5p_sys_clk_div0_tab_1GHZ,
-        s5p_sys_clk_div0_tab_1DOT2GHZ,
-};
-
-static const u32 (*s5p_sys_clk_mps_tab_all[2])[6] = {
-        s5p_sys_clk_mps_tab_1GHZ,
-        s5p_sys_clk_mps_tab_1DOT2GHZ,
-};
-
-#endif
 
 #ifdef CONFIG_PM_PWR_GATING
 extern int s5p_power_gating(unsigned int power_domain, unsigned int on_off);
