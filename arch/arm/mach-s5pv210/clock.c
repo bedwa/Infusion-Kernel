@@ -3505,10 +3505,10 @@ void __init_or_cpufreq s5pv210_setup_clocks(void)
 	clk_set_parent(&clk_mout_fimd.clk, &clk_mout_mpll.clk);
 	clk_set_parent(&clk_mout_mdnie.clk, &clk_mout_mpll.clk);
 
-	clk_set_rate(&clk_sclk_mmc0.clk, 55*MHZ);
-	clk_set_rate(&clk_sclk_mmc1.clk, 55*MHZ);
-	clk_set_rate(&clk_sclk_mmc2.clk, 55*MHZ);
-	clk_set_rate(&clk_sclk_mmc3.clk, 55*MHZ);
+	clk_set_rate(&clk_sclk_mmc0.clk, 52*MHZ);
+	clk_set_rate(&clk_sclk_mmc1.clk, 50*MHZ);
+	clk_set_rate(&clk_sclk_mmc2.clk, 50*MHZ);
+	clk_set_rate(&clk_sclk_mmc3.clk, 50*MHZ);
 	writel((readl(S5P_CLK_DIV4) & ~(0xffff0000)) | 0x44440000, S5P_CLK_DIV4);
 
 	//clk_set_rate(&clk_mout_fimd.clk, 167*MHZ); //, &clk_lcd.clk

@@ -104,7 +104,7 @@ enum PMIC_VOLTAGE {
 
 /* frequency voltage matching table */
 unsigned int frequency_match_1GHZ[][4] = {
-/* frequency, Mathce0d VDD ARM voltage , Matched VDD INT*/
+/* frequency, Mathced VDD ARM voltage , Matched VDD INT*/
 #if 1
 	{1800000, 1450, 1100, 0}, 
 	{1700000, 1400, 1100, 1}, 
@@ -135,7 +135,7 @@ unsigned int frequency_voltage_tab[][3] = {
 	{1600000, 1400, 1400},
         {1500000, 1350, 1350},
         {1400000, 1350, 1350},
-        {1300000, 1250, 1250},
+        {1300000, 1300, 1300},
         {1200000, 1250, 1250},
         {1000000, 1250, 1250},
         {800000, 1200, 1200},
