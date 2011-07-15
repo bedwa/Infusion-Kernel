@@ -40,10 +40,10 @@ enum perf_level {
 };
 
 enum freq_level_states {
-	LEV_2200MHZ,
-        LEV_2100MHZ,
-        LEV_2000MHZ,
-	LEV_1900MHZ,
+	LEV_2400MHZ,
+        LEV_2300MHZ,
+        LEV_2200MHZ,
+	LEV_2000MHZ,
         LEV_1800MHZ,
  	LEV_1600MHZ,
         LEV_1400MHZ,
