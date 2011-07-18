@@ -1,3 +1,0 @@
-#!/bin/sh
-make bedwa_defconfig
-make -j48 && cp -a $(find . -name *.ko -print) ../initramfs/lib/modules/ && make -j48

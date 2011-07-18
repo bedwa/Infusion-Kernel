@@ -60,34 +60,10 @@ u32 free_freq_levels = 4;
 
 struct S5PC110_clk_info clk_info[] = {
 {
-	// APLL:1700,ARMCLK:1700,HCLK_MSYS:200,MPLL:667,HCLK_DSYS:166,HCLK_PSYS:133,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
-	.armclk		=	1700* MHZ,
-	.apllout	=	1700* MHZ,
-	.apll_mps	=	((835<<16)|(12<<8)|1),
-	.msys_div0	=	(0|(7<<4)|(7<<8)|(1<<12)),
-	.mpllout	=	667* MHZ,
-	.mpll_mps	=	((667<<16)|(12<<8)|(1)),
-	.psys_dsys_div0 =	((3<<16)|(1<<20)|(4<<24)|(1<<28)),
-	.div2val	=	((4<<0)|(4<<4)|(4<<8)),
-	.dmc0_div6 	=	(3<<28),
-},
-{
 	// APLL:1600,ARMCLK:1600,HCLK_MSYS:200,MPLL:667,HCLK_DSYS:166,HCLK_PSYS:133,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
 	.armclk		=	1600* MHZ,
 	.apllout	=	1600* MHZ,
 	.apll_mps	=	((800<<16)|(12<<8)|1),
-	.msys_div0	=	(0|(7<<4)|(7<<8)|(1<<12)),
-	.mpllout	=	667* MHZ,
-	.mpll_mps	=	((667<<16)|(12<<8)|(1)),
-	.psys_dsys_div0 =	((3<<16)|(1<<20)|(4<<24)|(1<<28)),
-	.div2val	=	((4<<0)|(4<<4)|(4<<8)),
-	.dmc0_div6 	=	(3<<28),
-},
-{
-	// APLL:1500,ARMCLK:1500,HCLK_MSYS:200,MPLL:667,HCLK_DSYS:166,HCLK_PSYS:133,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
-	.armclk		=	1500* MHZ,
-	.apllout	=	1500* MHZ,
-	.apll_mps	=	((500<<16)|(8<<8)|1),
 	.msys_div0	=	(0|(7<<4)|(7<<8)|(1<<12)),
 	.mpllout	=	667* MHZ,
 	.mpll_mps	=	((667<<16)|(12<<8)|(1)),
@@ -108,18 +84,6 @@ struct S5PC110_clk_info clk_info[] = {
 	.dmc0_div6 	=	(3<<28),
 },
 {
-	// APLL:1300,ARMCLK:1300,HCLK_MSYS:200,MPLL:667,HCLK_DSYS:166,HCLK_PSYS:133,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
-	.armclk		=	1300* MHZ,
-	.apllout	=	1300* MHZ,
-	.apll_mps	=	((325<<16)|(6<<8)|1),
-	.msys_div0	=	(0|(6<<4)|(6<<8)|(1<<12)),
-	.mpllout	=	667* MHZ,
-	.mpll_mps	=	((667<<16)|(12<<8)|(1)),
-	.psys_dsys_div0 =	((3<<16)|(1<<20)|(4<<24)|(1<<28)),
-	.div2val	=	((3<<0)|(3<<4)|(3<<8)),
-	.dmc0_div6 	=	(3<<28),
-},
-{
 	// APLL:1200,ARMCLK:1200,HCLK_MSYS:200,MPLL:667,HCLK_DSYS:166,HCLK_PSYS:133,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
 	.armclk		=	1200* MHZ,
 	.apllout	=	1200* MHZ,
@@ -130,18 +94,6 @@ struct S5PC110_clk_info clk_info[] = {
 	.psys_dsys_div0 =	((3<<16)|(1<<20)|(4<<24)|(1<<28)),
 	.div2val	=	((3<<0)|(3<<4)|(3<<8)),
 	.dmc0_div6 	=	(3<<28),
-},
-{
-	// APLL:1100,ARMCLK:1100,HCLK_MSYS:200,MPLL:667,HCLK_DSYS:166,HCLK_PSYS:133,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
-	.armclk		=	1100* MHZ,
-	.apllout	=	1100* MHZ,
-	.apll_mps	=	((275<<16)|(6<<8)|1),
-	.msys_div0	=	(0|(6<<4)|(6<<8)|(1<<12)),
- 	.mpllout	=	667* MHZ,
- 	.mpll_mps	=	((667<<16)|(12<<8)|(1)),
- 	.psys_dsys_div0 =	((3<<16)|(1<<20)|(4<<24)|(1<<28)),
- 	.div2val	=	((3<<0)|(3<<4)|(3<<8)),
- 	.dmc0_div6 	=	(3<<28),
 },
 {
 	// APLL:1000,ARMCLK:1000,HCLK_MSYS:200,MPLL:667,HCLK_DSYS:166,HCLK_PSYS:133,PCLK_MSYS:100,PCLK_DSYS:83,PCLK_PSYS:66
