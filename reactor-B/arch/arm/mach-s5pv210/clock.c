@@ -55,7 +55,7 @@ struct S5PC110_clk_info {
 
 //armclk,mdiv,pdiv,sdiv,DIVA2M,DIVHCLKM,DIVPCLKM,DIVG2D,DIVMFC,DIVG3D
 //u32 free_freq_values_table[][10] = {{1250,625,12,1,6,6,1,3,3,3},{1300,325,6,1,6,6,1,3,3,3},{1350,675,12,1,6,6,1,3,3,3},{1400,350,6,1,6,6,1,3,3,3},};
-u32 free_freq_values_table[][10] = {{1700,850,12,1,7,7,1,4,4,4},{1600,800,12,1,7,7,1,4,4,4},{1500,500,8,1,7,7,1,4,4,4},};
+u32 free_freq_values_table[][10] = {{1664,832,12,1,7,7,1,4,4,4},{1456,728,12,1,6,6,1,4,4,4},{1248,624,12,1,5,5,1,4,4,4},};
 u32 free_freq_levels = 4;
 
 struct S5PC110_clk_info clk_info[] = {
