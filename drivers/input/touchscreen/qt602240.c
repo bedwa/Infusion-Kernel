@@ -3680,7 +3680,11 @@ void  get_message(struct work_struct * p)
 			#if USE_PERF_LEVEL_TS
 				if(id == 0){
 					//set_dvfs_perf_level();
+					#ifdef LEV_800MHZ
 					s5pc110_lock_dvfs_high_level(DVFS_LOCK_TOKEN_4, LEV_800MHZ);
+					#else
+					s5pc110_lock_dvfs_high_level(DVFS_LOCK_TOKEN_4, LEV_832MHZ);
+					#endif
 					touch_state_val=1;
 					}
 			#endif
@@ -3714,7 +3718,11 @@ void  get_message(struct work_struct * p)
 			#if USE_PERF_LEVEL_TS
 			if(id == 0){
 				//set_dvfs_perf_level();
+				#ifdef LEV_800MHZ
 				s5pc110_lock_dvfs_high_level(DVFS_LOCK_TOKEN_4, LEV_800MHZ);
+				#else
+				s5pc110_lock_dvfs_high_level(DVFS_LOCK_TOKEN_4, LEV_832MHZ);
+				#endif
 				}
 			#endif
 			#endif
