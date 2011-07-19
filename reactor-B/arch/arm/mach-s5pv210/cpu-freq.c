@@ -84,56 +84,56 @@ extern u32 free_freq_levels;
 
 /* frequency */
 struct cpufreq_frequency_table s5pc110_freq_table_1GHZ[] = {
-        {L0, 1600*1000},
-	{L1, 1400*1000},
-	{L2, 1200*1000},
-	{L3, 1000*1000},
-	{L4, 800*1000},
-        {L5, 600*1000},
-	{L6, 400*1000},
-	{L7, 200*1000},
-	{L8, 100*1000},
+        {L0, 1664*1000},
+	{L1, 1456*1000},
+	{L2, 1248*1000},
+	{L3, 1040*1000},
+	{L4, 832*1000},
+        {L5, 624*1000},
+	{L6, 416*1000},
+	{L7, 208*1000},
+	{L8, 104*1000},
 	{0, CPUFREQ_TABLE_END},
 };
 
 /*Assigning different index for fast scaling up*/
 static unsigned char transition_state_1GHZ[][2] = {
-        {1, 0},//1600
-        {2, 0},//1400
-        {3, 1},//1200
-        {4, 2},//1000
-        {5, 3},//800
-        {6, 4},//600 
-        {7, 5},//400 
-        {8, 6},//200 
-        {8, 7},//100 
+        {1, 0},//1664
+        {2, 0},//1456
+        {3, 1},//1248
+        {4, 2},//1040
+        {5, 3},//832
+        {6, 4},//624 
+        {7, 5},//416 
+        {8, 6},//208 
+        {8, 7},//104 
 };
 
 /* frequency */
 static struct cpufreq_frequency_table s5pc110_freq_table_1d2GHZ[] = {
-        {L0, 1600*1000},
-	{L1, 1400*1000},
-	{L2, 1200*1000},
-	{L3, 1000*1000},
-	{L4, 800*1000},
-        {L5, 600*1000},
-	{L6, 400*1000},
-	{L7, 200*1000},
-	{L8, 100*1000},
+        {L0, 1664*1000},
+	{L1, 1456*1000},
+	{L2, 1248*1000},
+	{L3, 1040*1000},
+	{L4, 832*1000},
+        {L5, 624*1000},
+	{L6, 416*1000},
+	{L7, 208*1000},
+	{L8, 104*1000},
 	{0, CPUFREQ_TABLE_END},
 };
 
 /*Assigning different index for fast scaling up*/
 static unsigned char transition_state_1d2GHZ[][2] = {
-        {1, 0},//1600
-        {2, 0},//1400
-        {3, 1},//1200
-        {4, 2},//1000
-        {5, 3},//800
-        {6, 4},//600 
-        {7, 5},//400 
-        {8, 6},//200 
-        {8, 7},//100 
+        {1, 0},//1664
+        {2, 0},//1456
+        {3, 1},//1248
+        {4, 2},//1040
+        {5, 3},//832
+        {6, 4},//624 
+        {7, 5},//416 
+        {8, 6},//208 
+        {8, 7},//104 
 };
 
 
@@ -148,27 +148,27 @@ static struct cpufreq_frequency_table *s5pc110_freq_table[] = {
 };
 
 unsigned int s5pc110_thres_table_1GHZ[][2] = {
-	{55, 80}, //100
-	{55, 90}, //200
-	{55, 90}, //400
-	{55, 90}, //600
-	{55, 90}, //800
-	{55, 90}, //1000
-	{60, 80}, // 1200
-	{60, 80}, // 1400
-	{60, 80}, // 1600
+	{55, 80}, //104
+	{55, 90}, //208
+	{55, 90}, //416
+	{55, 90}, //624
+	{55, 90}, //832
+	{55, 90}, //1040
+	{60, 80}, // 1248
+	{60, 80}, // 1456
+	{60, 80}, // 1664
 };
 
 unsigned int s5pc110_thres_table_1d2GHZ[][2] = {
-	{55, 80}, //100
-	{55, 90}, //200
-	{55, 90}, //400
-	{55, 90}, //600
-	{55, 90}, //800
-	{55, 90}, //1000
-	{60, 80}, //1200
-	{60, 80}, //1400
-	{60, 80}, //1600
+	{55, 80}, //104
+	{55, 90}, //208
+	{55, 90}, //416
+	{55, 90}, //624
+	{55, 90}, //832
+	{55, 90}, //1040
+	{60, 80}, //1248
+	{60, 80}, //1456
+	{60, 80}, //1664
 };
 
 unsigned int  (*s5pc110_thres_table[2])[2] = {
@@ -183,32 +183,32 @@ static int get_dvfs_perf_level(enum freq_level_states freq_level, unsigned int *
 	struct cpufreq_frequency_table *freq_tab = s5pc110_freq_table[S5PC11X_FREQ_TAB];
 	switch(freq_level)
 	{
-        case LEV_1600MHZ:
-                freq = 1600 * 1000;
+        case LEV_1664MHZ:
+                freq = 1664 * 1000;
                 break;
-        case LEV_1400MHZ:
-                freq = 1400 * 1000;
+        case LEV_1456MHZ:
+                freq = 1456 * 1000;
                 break;
-        case LEV_1200MHZ:
-                freq = 1200 * 1000;
+        case LEV_1248MHZ:
+                freq = 1248 * 1000;
                 break;
-        case LEV_1000MHZ:
-                freq = 1000 * 1000;
+        case LEV_1040MHZ:
+                freq = 1040 * 1000;
                 break;
-        case LEV_800MHZ:
-                freq = 800 * 1000;
+        case LEV_832MHZ:
+                freq = 832 * 1000;
                 break;
-        case LEV_600MHZ:
-                freq = 600 * 1000;
+        case LEV_624MHZ:
+                freq = 624 * 1000;
                 break;
-        case LEV_400MHZ:
-                freq = 400 * 1000;
+        case LEV_416MHZ:
+                freq = 416 * 1000;
                 break;
-        case LEV_200MHZ:
-                freq = 200 * 1000; 
+        case LEV_208MHZ:
+                freq = 208 * 1000; 
                 break;
-        case LEV_100MHZ:
-                freq = 100 * 1000;
+        case LEV_104MHZ:
+                freq = 104 * 1000;
                 break;
         default:
                 printk(KERN_ERR "Invalid freq level\n");
