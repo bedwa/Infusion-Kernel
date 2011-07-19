@@ -36,15 +36,15 @@ enum perf_level {
 };
 
 enum freq_level_states {
-        LEV_1600MHZ,
-	LEV_1400MHZ,
- 	LEV_1200MHZ,
- 	LEV_1000MHZ,
- 	LEV_800MHZ,
-        LEV_600MHZ,
-	LEV_400MHZ,
-	LEV_200MHZ,
-	LEV_100MHZ,
+        LEV_1664MHZ,
+	LEV_1456MHZ,
+ 	LEV_1248MHZ,
+ 	LEV_1040MHZ,
+ 	LEV_832MHZ,
+        LEV_624MHZ,
+	LEV_416MHZ,
+	LEV_208MHZ,
+	LEV_104MHZ,
 };
 
 extern unsigned int s5pc11x_cpufreq_index;
