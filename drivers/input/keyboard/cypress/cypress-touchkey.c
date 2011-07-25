@@ -29,12 +29,16 @@
 #include <asm/uaccess.h>
 #include <linux/earlysuspend.h>
 #include <asm/io.h>
+#ifdef CONFIG_GENERIC_BLN
+#include <linux/bln.h>
+#endif
 #ifdef CONFIG_CPU_FREQ
 #include <mach/cpu-freq-v210.h>
 #endif
 #ifdef CONFIG_REGULATOR_MAX8893
 #include <mach/max8998_function.h>
 #endif
+
 /*
 Melfas touchkey register
 */
@@ -138,6 +142,27 @@ static void set_touchkey_debug(char value)
 	touchkey_debug_count++;
 }
 
+static void touchkey_power_on(void) {
+#ifndef CONFIG_S5PC110_DEMPSEY_BOARD
+			gpio_direction_output(_3_GPIO_TOUCH_EN, 1);
+#endif
+#if !(defined(CONFIG_ARIES_NTT) || defined(CONFIG_S5PC110_DEMPSEY_BOARD))
+			gpio_direction_output(_3_GPIO_TOUCH_CE, 1);
+#endif
+}
+
+static void touchkey_power_off(void) {
+#ifndef CONFIG_S5PC110_DEMPSEY_BOARD
+			gpio_direction_output(_3_GPIO_TOUCH_EN, 0);
+#endif
+#if !(defined(CONFIG_ARIES_NTT) || defined(CONFIG_S5PC110_DEMPSEY_BOARD))
+			gpio_direction_output(_3_GPIO_TOUCH_CE, 0);
+#endif
+			gpio_direction_output(_3_TOUCH_SDA_28V, 0);
+			gpio_direction_output(_3_TOUCH_SCL_28V, 0);
+
+}
+
 static int i2c_touchkey_read(u8 reg, u8 * val, unsigned int len)
 {
 	int err;
@@ -203,11 +228,11 @@ void touchkey_work_func(struct work_struct *p)
 	set_touchkey_debug('a');
 	if (!gpio_get_value(_3_GPIO_TOUCH_INT)) {
 		#ifdef CONFIG_CPU_FREQ
-		#if MAXIMUM_FREQ == 1200000
+#if MAXIMUM_FREQ == 1200000 
 		set_dvfs_target_level(LEV_800MHZ);
-		#else
+#else
 		set_dvfs_target_level(LEV_832MHZ);
-		#endif
+#endif
 		#endif
 		ret = i2c_touchkey_read(KEYCODE_REG, data, 1);
 		set_touchkey_debug(data[0]);
@@ -243,14 +268,7 @@ void touchkey_work_func(struct work_struct *p)
 			//touchkey die , do not enable touchkey
 			//enable_irq(IRQ_TOUCH_INT);
 			touchkey_enable = -1;
-#ifndef CONFIG_S5PC110_DEMPSEY_BOARD
-			gpio_direction_output(_3_GPIO_TOUCH_EN, 0);
-#endif
-#if !(defined(CONFIG_ARIES_NTT) || defined(CONFIG_S5PC110_DEMPSEY_BOARD))
-			gpio_direction_output(_3_GPIO_TOUCH_CE, 0);
-#endif
-			gpio_direction_output(_3_TOUCH_SDA_28V, 0);
-			gpio_direction_output(_3_TOUCH_SCL_28V, 0);
+            touchkey_power_off();
 			printk("%s touchkey died\n", __func__);
 			set_touchkey_debug('D');
 			return;
@@ -332,27 +350,23 @@ static irqreturn_t touchkey_interrupt(int irq, void *dummy)
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void melfas_touchkey_early_suspend(struct early_suspend *h)
 {
-	touchkey_enable = 0;
-	set_touchkey_debug('S');
-	printk(KERN_DEBUG "melfas_touchkey_early_suspend\n");
-	if (touchkey_enable < 0) {
-		printk("---%s---touchkey_enable: %d\n", __FUNCTION__,
-		       touchkey_enable);
-		return;
-	}
-
-	disable_irq(IRQ_TOUCH_INT);
-#ifndef CONFIG_S5PC110_DEMPSEY_BOARD
-	gpio_direction_output(_3_GPIO_TOUCH_EN, 0);
+#ifdef CONFIG_GENERIC_BLN
+    if(0) {
 #else
-//	Set_MAX8998_PM_OUTPUT_Voltage(LDO13, VCC_2p800);	
-	Set_MAX8998_PM_REG(ELDO13, 0);
+    if(1) {
 #endif
-#if !(defined(CONFIG_ARIES_NTT) || defined(CONFIG_S5PC110_DEMPSEY_BOARD))
-	gpio_direction_output(_3_GPIO_TOUCH_CE, 0);
-#endif
-	gpio_direction_output(_3_TOUCH_SDA_28V, 0);
-	gpio_direction_output(_3_TOUCH_SCL_28V, 0);
+	    touchkey_enable = 0;
+    }
+	    set_touchkey_debug('S');
+	    printk(KERN_DEBUG "melfas_touchkey_early_suspend\n");
+	    if (touchkey_enable < 0) {
+		    printk("---%s---touchkey_enable: %d\n", __FUNCTION__,
+		           touchkey_enable);
+		    return;
+	    }
+
+	   disable_irq(IRQ_TOUCH_INT);
+       touchkey_power_off();
 }
 
 static void melfas_touchkey_early_resume(struct early_suspend *h)
@@ -685,6 +699,23 @@ static DEVICE_ATTR(enable_disable, S_IRUGO | S_IWUSR | S_IWOTH | S_IXOTH, NULL,
 
 extern unsigned int HWREV;
 
+static void melfas_enable_touchkey_backlights(void) {
+	uint8_t val = 1;
+	i2c_touchkey_write(&val, sizeof(val));
+	touchkey_led_status = val;
+}
+
+static void melfas_disable_touchkey_backlights(void) {
+	uint8_t val = 2;
+	i2c_touchkey_write(&val, sizeof(val));
+	touchkey_led_status = val;
+}
+
+static struct bln_implementation cypress_touchkey_bln = {
+	.enable = melfas_enable_touchkey_backlights,
+	.disable = melfas_disable_touchkey_backlights,
+};
+
 static int __init touchkey_init(void)
 {
 	int ret = 0;
@@ -811,6 +842,11 @@ static int __init touchkey_init(void)
 		    ("melfas touch keypad registration failed, module not inserted.ret= %d\n",
 		     ret);
 	}
+
+#ifdef CONFIG_GENERIC_BLN
+    register_bln_implementation(&cypress_touchkey_bln);
+#endif
+
 	return ret;
 }
 

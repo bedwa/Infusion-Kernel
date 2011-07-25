@@ -25,7 +25,7 @@ config ANDROID_PMEM_MEMSIZE_PMEM
 
 config ANDROID_PMEM_MEMSIZE_PMEM_GPU1
         int "Memory size in kbytes for android surface using pmem_gpu1"
-        default "3072"
+        default "4096"
 
 config ANDROID_PMEM_MEMSIZE_PMEM_ADSP
         int "Memory size in kbytes for android surface using pmem_adsp"
@@ -304,6 +304,14 @@ config MHL_SII9234
 	depends on I2C
 	---help---
 	Mobile HD Link Transmitter driver for SiI9234
+
+config GENERIC_BLN
+    bool "Generic BLN support for backlight notification"
+    default y
+    help
+         Say Y here to enable the backlight notification
+         for android led-notification (modified liblight needed)
+
 
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
